@@ -1,0 +1,13 @@
+# Generating datasets
+
+google-genai
+pydantic
+python-dotenv
+tenacity
+
+#evals
+
+openai
+numpy
+scipy
+statsmodels

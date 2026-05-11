@@ -1,0 +1,391 @@
+[
+    {
+        "cart_id": "cart_001",
+        "cart_contents": [
+            "iPhone 15 Pro",
+            "AirPods Pro"
+        ],
+        "user_device_type": "iOS",
+        "historical_purchase_flags": [],
+        "expected_intent": "Electronics Damage Protection",
+        "is_ambiguous_edge_case": false
+    },
+    {
+        "cart_id": "cart_002",
+        "cart_contents": [
+            "Gaming Laptop",
+            "External Monitor"
+        ],
+        "user_device_type": "Desktop",
+        "historical_purchase_flags": [
+            "Tech Enthusiast"
+        ],
+        "expected_intent": "Electronics Damage Protection",
+        "is_ambiguous_edge_case": false
+    },
+    {
+        "cart_id": "cart_003",
+        "cart_contents": [
+            "Flight ticket to Paris",
+            "3-night hotel booking"
+        ],
+        "user_device_type": "Desktop",
+        "historical_purchase_flags": [
+            "Frequent Traveler"
+        ],
+        "expected_intent": "Travel Cancellation",
+        "is_ambiguous_edge_case": false
+    },
+    {
+        "cart_id": "cart_004",
+        "cart_contents": [
+            "Cruise package to Alaska",
+            "Shore Excursion tickets"
+        ],
+        "user_device_type": "Android",
+        "historical_purchase_flags": [],
+        "expected_intent": "Travel Cancellation",
+        "is_ambiguous_edge_case": false
+    },
+    {
+        "cart_id": "cart_005",
+        "cart_contents": [
+            "High-value designer handbag",
+            "Luxury smart watch"
+        ],
+        "user_device_type": "iOS",
+        "historical_purchase_flags": [
+            "High Spender"
+        ],
+        "expected_intent": "Fraud/Cyber Protection",
+        "is_ambiguous_edge_case": false
+    },
+    {
+        "cart_id": "cart_006",
+        "cart_contents": [
+            "Premium VPN service 1-year",
+            "Online software suite subscription"
+        ],
+        "user_device_type": "Desktop",
+        "historical_purchase_flags": [
+            "Digital Buyer"
+        ],
+        "expected_intent": "Fraud/Cyber Protection",
+        "is_ambiguous_edge_case": false
+    },
+    {
+        "cart_id": "cart_007",
+        "cart_contents": [
+            "Ski boots",
+            "Ski jacket",
+            "Lift pass"
+        ],
+        "user_device_type": "iOS",
+        "historical_purchase_flags": [
+            "Outdoor Adventurer"
+        ],
+        "expected_intent": "Health/Accident",
+        "is_ambiguous_edge_case": false
+    },
+    {
+        "cart_id": "cart_008",
+        "cart_contents": [
+            "Mountain bike",
+            "Cycling helmet",
+            "First-aid kit"
+        ],
+        "user_device_type": "Android",
+        "historical_purchase_flags": [],
+        "expected_intent": "Health/Accident",
+        "is_ambiguous_edge_case": false
+    },
+    {
+        "cart_id": "cart_009",
+        "cart_contents": [
+            "iPhone 15 Pro",
+            "Flight ticket to Rome"
+        ],
+        "user_device_type": "iOS",
+        "historical_purchase_flags": [],
+        "expected_intent": "Travel Cancellation",
+        "is_ambiguous_edge_case": true
+    },
+    {
+        "cart_id": "cart_010",
+        "cart_contents": [
+            "Ski equipment rental",
+            "Gaming console",
+            "Hotel booking"
+        ],
+        "user_device_type": "Desktop",
+        "historical_purchase_flags": [],
+        "expected_intent": "No Insurance Applicable",
+        "is_ambiguous_edge_case": true
+    },
+    {
+        "cart_id": "CART001",
+        "cart_contents": [
+            "iPhone 15 Pro Max",
+            "AirPods Pro 2",
+            "Laptop Sleeve"
+        ],
+        "user_device_type": "iOS",
+        "historical_purchase_flags": [],
+        "expected_intent": "Electronics Damage Protection",
+        "is_ambiguous_edge_case": false
+    },
+    {
+        "cart_id": "CART002",
+        "cart_contents": [
+            "Samsung Galaxy S24 Ultra",
+            "Smartwatch",
+            "Wireless Charger"
+        ],
+        "user_device_type": "Android",
+        "historical_purchase_flags": [],
+        "expected_intent": "Electronics Damage Protection",
+        "is_ambiguous_edge_case": false
+    },
+    {
+        "cart_id": "CART003",
+        "cart_contents": [
+            "Flight Ticket - NYC to LAX",
+            "Hotel Booking - Hilton",
+            "Car Rental"
+        ],
+        "user_device_type": "Desktop",
+        "historical_purchase_flags": [
+            "Frequent Traveler"
+        ],
+        "expected_intent": "Travel Cancellation",
+        "is_ambiguous_edge_case": false
+    },
+    {
+        "cart_id": "CART004",
+        "cart_contents": [
+            "International Flight - Paris to Tokyo",
+            "Travel Visa Application Fee",
+            "Travel Insurance Guidebook"
+        ],
+        "user_device_type": "Desktop",
+        "historical_purchase_flags": [
+            "Frequent Traveler"
+        ],
+        "expected_intent": "Travel Cancellation",
+        "is_ambiguous_edge_case": false
+    },
+    {
+        "cart_id": "CART005",
+        "cart_contents": [
+            "Antivirus Software License",
+            "VPN Subscription - 1 Year",
+            "Password Manager"
+        ],
+        "user_device_type": "Desktop",
+        "historical_purchase_flags": [],
+        "expected_intent": "Fraud/Cyber Protection",
+        "is_ambiguous_edge_case": false
+    },
+    {
+        "cart_id": "CART006",
+        "cart_contents": [
+            "Identity Theft Protection Service",
+            "Secure USB Drive",
+            "Data Backup Cloud Storage"
+        ],
+        "user_device_type": "Desktop",
+        "historical_purchase_flags": [],
+        "expected_intent": "Fraud/Cyber Protection",
+        "is_ambiguous_edge_case": false
+    },
+    {
+        "cart_id": "CART007",
+        "cart_contents": [
+            "Mountain Bike Helmet",
+            "First Aid Kit",
+            "Hiking Boots",
+            "Water Bottle"
+        ],
+        "user_device_type": "iOS",
+        "historical_purchase_flags": [],
+        "expected_intent": "Health/Accident",
+        "is_ambiguous_edge_case": false
+    },
+    {
+        "cart_id": "CART008",
+        "cart_contents": [
+            "Ski Pass - Aspen",
+            "Ski Goggles",
+            "Winter Jacket",
+            "Thermal Underwear"
+        ],
+        "user_device_type": "Android",
+        "historical_purchase_flags": [],
+        "expected_intent": "Health/Accident",
+        "is_ambiguous_edge_case": false
+    },
+    {
+        "cart_id": "CART009",
+        "cart_contents": [
+            "Groceries",
+            "Cleaning Supplies",
+            "Toilet Paper",
+            "Pet Food"
+        ],
+        "user_device_type": "iOS",
+        "historical_purchase_flags": [],
+        "expected_intent": "No Insurance Applicable",
+        "is_ambiguous_edge_case": false
+    },
+    {
+        "cart_id": "CART010",
+        "cart_contents": [
+            "Laptop - MacBook Pro",
+            "Flight Ticket - London to Rome",
+            "Digital Camera",
+            "Travel Adapter"
+        ],
+        "user_device_type": "Desktop",
+        "historical_purchase_flags": [
+            "Frequent Traveler",
+            "Tech Enthusiast"
+        ],
+        "expected_intent": "Travel Cancellation",
+        "is_ambiguous_edge_case": true
+    },
+    {
+        "cart_id": "C001",
+        "cart_contents": [
+            "iPhone 15 Pro",
+            "AirPods Pro",
+            "Wireless Charger"
+        ],
+        "user_device_type": "iOS",
+        "historical_purchase_flags": [],
+        "expected_intent": "Electronics Damage Protection",
+        "is_ambiguous_edge_case": false
+    },
+    {
+        "cart_id": "C002",
+        "cart_contents": [
+            "Gaming PC",
+            "Gaming Monitor",
+            "Travel Visa Application Fee"
+        ],
+        "user_device_type": "Desktop",
+        "historical_purchase_flags": [
+            "Frequent Gamer"
+        ],
+        "expected_intent": "Electronics Damage Protection",
+        "is_ambiguous_edge_case": true
+    },
+    {
+        "cart_id": "C003",
+        "cart_contents": [
+            "Round-trip flight to Paris",
+            "Hotel reservation for 7 nights",
+            "Rental car booking"
+        ],
+        "user_device_type": "Desktop",
+        "historical_purchase_flags": [
+            "Frequent Traveler"
+        ],
+        "expected_intent": "Travel Cancellation",
+        "is_ambiguous_edge_case": false
+    },
+    {
+        "cart_id": "C004",
+        "cart_contents": [
+            "Cruise ticket to Alaska",
+            "New DSLR Camera",
+            "Waterproof Drone"
+        ],
+        "user_device_type": "iOS",
+        "historical_purchase_flags": [
+            "High Spender"
+        ],
+        "expected_intent": "Travel Cancellation",
+        "is_ambiguous_edge_case": true
+    },
+    {
+        "cart_id": "C005",
+        "cart_contents": [
+            "Antivirus Software License (1 year)",
+            "Online Cloud Storage Subscription",
+            "Password Manager Premium"
+        ],
+        "user_device_type": "Android",
+        "historical_purchase_flags": [],
+        "expected_intent": "Fraud/Cyber Protection",
+        "is_ambiguous_edge_case": false
+    },
+    {
+        "cart_id": "C006",
+        "cart_contents": [
+            "Gift Card (USD 500)",
+            "Smart Home Security Camera System",
+            "VPN Service Subscription"
+        ],
+        "user_device_type": "Desktop",
+        "historical_purchase_flags": [],
+        "expected_intent": "Fraud/Cyber Protection",
+        "is_ambiguous_edge_case": true
+    },
+    {
+        "cart_id": "C007",
+        "cart_contents": [
+            "Mountain Bike",
+            "Helmet",
+            "First Aid Kit",
+            "Cycling Gloves"
+        ],
+        "user_device_type": "iOS",
+        "historical_purchase_flags": [
+            "Outdoor Enthusiast"
+        ],
+        "expected_intent": "Health/Accident",
+        "is_ambiguous_edge_case": false
+    },
+    {
+        "cart_id": "C008",
+        "cart_contents": [
+            "Running Shoes",
+            "Fitness Tracker",
+            "Smartwatch (GPS enabled)",
+            "Protein Powder"
+        ],
+        "user_device_type": "Android",
+        "historical_purchase_flags": [
+            "Fitness Buff"
+        ],
+        "expected_intent": "Health/Accident",
+        "is_ambiguous_edge_case": true
+    },
+    {
+        "cart_id": "C009",
+        "cart_contents": [
+            "Groceries (milk, bread, eggs)",
+            "Laundry Detergent",
+            "Paper Towels"
+        ],
+        "user_device_type": "Android",
+        "historical_purchase_flags": [],
+        "expected_intent": "No Insurance Applicable",
+        "is_ambiguous_edge_case": false
+    },
+    {
+        "cart_id": "C010",
+        "cart_contents": [
+            "Books (fiction novel)",
+            "T-shirt",
+            "Coffee Mug",
+            "Scented Candle"
+        ],
+        "user_device_type": "Desktop",
+        "historical_purchase_flags": [
+            "High Returns"
+        ],
+        "expected_intent": "No Insurance Applicable",
+        "is_ambiguous_edge_case": false
+    }
+]

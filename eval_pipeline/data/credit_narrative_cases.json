@@ -1,0 +1,242 @@
+[
+    {
+        "merchant_id": "MSME001",
+        "msme_registration_status": "Registered",
+        "business_vintage_years": 8.5,
+        "historical_default_rate_percentage": 0.0,
+        "yoy_gmv_growth_percentage": 25.7,
+        "expected_decision": "Approve"
+    },
+    {
+        "merchant_id": "MSME002",
+        "msme_registration_status": "Registered",
+        "business_vintage_years": 5.0,
+        "historical_default_rate_percentage": 1.2,
+        "yoy_gmv_growth_percentage": 18.3,
+        "expected_decision": "Approve"
+    },
+    {
+        "merchant_id": "MSME003",
+        "msme_registration_status": "Registered",
+        "business_vintage_years": 3.75,
+        "historical_default_rate_percentage": 0.5,
+        "yoy_gmv_growth_percentage": 8.1,
+        "expected_decision": "Approve"
+    },
+    {
+        "merchant_id": "MSME004",
+        "msme_registration_status": "Registered",
+        "business_vintage_years": 6.0,
+        "historical_default_rate_percentage": 0.0,
+        "yoy_gmv_growth_percentage": -5.25,
+        "expected_decision": "Manual Review"
+    },
+    {
+        "merchant_id": "MSME005",
+        "msme_registration_status": "Pending",
+        "business_vintage_years": 1.5,
+        "historical_default_rate_percentage": 0.0,
+        "yoy_gmv_growth_percentage": 30.0,
+        "expected_decision": "Manual Review"
+    },
+    {
+        "merchant_id": "MSME006",
+        "msme_registration_status": "Registered",
+        "business_vintage_years": 4.25,
+        "historical_default_rate_percentage": 2.5,
+        "yoy_gmv_growth_percentage": 2.1,
+        "expected_decision": "Manual Review"
+    },
+    {
+        "merchant_id": "MSME007",
+        "msme_registration_status": "Registered",
+        "business_vintage_years": 7.0,
+        "historical_default_rate_percentage": 15.0,
+        "yoy_gmv_growth_percentage": 10.0,
+        "expected_decision": "Reject"
+    },
+    {
+        "merchant_id": "MSME008",
+        "msme_registration_status": "Unregistered",
+        "business_vintage_years": 0.75,
+        "historical_default_rate_percentage": 8.0,
+        "yoy_gmv_growth_percentage": -12.5,
+        "expected_decision": "Reject"
+    },
+    {
+        "merchant_id": "MSME009",
+        "msme_registration_status": "Registered",
+        "business_vintage_years": 10.0,
+        "historical_default_rate_percentage": 4.0,
+        "yoy_gmv_growth_percentage": -20.0,
+        "expected_decision": "Reject"
+    },
+    {
+        "merchant_id": "MSME010",
+        "msme_registration_status": "Unregistered",
+        "business_vintage_years": 12.0,
+        "historical_default_rate_percentage": 1.0,
+        "yoy_gmv_growth_percentage": 15.5,
+        "expected_decision": "Manual Review"
+    },
+    {
+        "merchant_id": "MSME001",
+        "msme_registration_status": "Registered",
+        "business_vintage_years": 10.5,
+        "historical_default_rate_percentage": 0.0,
+        "yoy_gmv_growth_percentage": 25.75,
+        "expected_decision": "Approve"
+    },
+    {
+        "merchant_id": "MSME002",
+        "msme_registration_status": "Registered",
+        "business_vintage_years": 7.0,
+        "historical_default_rate_percentage": 1.2,
+        "yoy_gmv_growth_percentage": 15.0,
+        "expected_decision": "Approve"
+    },
+    {
+        "merchant_id": "MSME003",
+        "msme_registration_status": "Registered",
+        "business_vintage_years": 5.5,
+        "historical_default_rate_percentage": 0.5,
+        "yoy_gmv_growth_percentage": -2.5,
+        "expected_decision": "Manual Review"
+    },
+    {
+        "merchant_id": "MSME004",
+        "msme_registration_status": "Registered",
+        "business_vintage_years": 8.25,
+        "historical_default_rate_percentage": 0.0,
+        "yoy_gmv_growth_percentage": -10.0,
+        "expected_decision": "Manual Review"
+    },
+    {
+        "merchant_id": "MSME005",
+        "msme_registration_status": "Unregistered",
+        "business_vintage_years": 6.0,
+        "historical_default_rate_percentage": 1.5,
+        "yoy_gmv_growth_percentage": 20.0,
+        "expected_decision": "Manual Review"
+    },
+    {
+        "merchant_id": "MSME006",
+        "msme_registration_status": "Pending",
+        "business_vintage_years": 3.75,
+        "historical_default_rate_percentage": 0.8,
+        "yoy_gmv_growth_percentage": 8.5,
+        "expected_decision": "Manual Review"
+    },
+    {
+        "merchant_id": "MSME007",
+        "msme_registration_status": "Registered",
+        "business_vintage_years": 4.0,
+        "historical_default_rate_percentage": 12.0,
+        "yoy_gmv_growth_percentage": 5.0,
+        "expected_decision": "Reject"
+    },
+    {
+        "merchant_id": "MSME008",
+        "msme_registration_status": "Unregistered",
+        "business_vintage_years": 0.5,
+        "historical_default_rate_percentage": 5.0,
+        "yoy_gmv_growth_percentage": -15.0,
+        "expected_decision": "Reject"
+    },
+    {
+        "merchant_id": "MSME009",
+        "msme_registration_status": "Registered",
+        "business_vintage_years": 2.25,
+        "historical_default_rate_percentage": 7.5,
+        "yoy_gmv_growth_percentage": -8.0,
+        "expected_decision": "Reject"
+    },
+    {
+        "merchant_id": "MSME010",
+        "msme_registration_status": "Unregistered",
+        "business_vintage_years": 1.0,
+        "historical_default_rate_percentage": 0.0,
+        "yoy_gmv_growth_percentage": 12.0,
+        "expected_decision": "Manual Review"
+    },
+    {
+        "merchant_id": "M001",
+        "msme_registration_status": "Registered",
+        "business_vintage_years": 10.5,
+        "historical_default_rate_percentage": 0.5,
+        "yoy_gmv_growth_percentage": 25.75,
+        "expected_decision": "Approve"
+    },
+    {
+        "merchant_id": "M002",
+        "msme_registration_status": "Registered",
+        "business_vintage_years": 7.0,
+        "historical_default_rate_percentage": 1.2,
+        "yoy_gmv_growth_percentage": 18.0,
+        "expected_decision": "Approve"
+    },
+    {
+        "merchant_id": "M003",
+        "msme_registration_status": "Registered",
+        "business_vintage_years": 4.25,
+        "historical_default_rate_percentage": 2.5,
+        "yoy_gmv_growth_percentage": 10.3,
+        "expected_decision": "Approve"
+    },
+    {
+        "merchant_id": "M004",
+        "msme_registration_status": "Registered",
+        "business_vintage_years": 5.0,
+        "historical_default_rate_percentage": 0.0,
+        "yoy_gmv_growth_percentage": -5.2,
+        "expected_decision": "Manual Review"
+    },
+    {
+        "merchant_id": "M005",
+        "msme_registration_status": "Pending",
+        "business_vintage_years": 0.75,
+        "historical_default_rate_percentage": 0.0,
+        "yoy_gmv_growth_percentage": 40.0,
+        "expected_decision": "Manual Review"
+    },
+    {
+        "merchant_id": "M006",
+        "msme_registration_status": "Unregistered",
+        "business_vintage_years": 3.5,
+        "historical_default_rate_percentage": 3.8,
+        "yoy_gmv_growth_percentage": 12.5,
+        "expected_decision": "Manual Review"
+    },
+    {
+        "merchant_id": "M007",
+        "msme_registration_status": "Registered",
+        "business_vintage_years": 6.0,
+        "historical_default_rate_percentage": 7.0,
+        "yoy_gmv_growth_percentage": 8.0,
+        "expected_decision": "Manual Review"
+    },
+    {
+        "merchant_id": "M008",
+        "msme_registration_status": "Registered",
+        "business_vintage_years": 2.5,
+        "historical_default_rate_percentage": 15.0,
+        "yoy_gmv_growth_percentage": -10.0,
+        "expected_decision": "Reject"
+    },
+    {
+        "merchant_id": "M009",
+        "msme_registration_status": "Unregistered",
+        "business_vintage_years": 0.5,
+        "historical_default_rate_percentage": 20.0,
+        "yoy_gmv_growth_percentage": -15.5,
+        "expected_decision": "Reject"
+    },
+    {
+        "merchant_id": "M010",
+        "msme_registration_status": "Unregistered",
+        "business_vintage_years": 12.0,
+        "historical_default_rate_percentage": 9.5,
+        "yoy_gmv_growth_percentage": -20.25,
+        "expected_decision": "Reject"
+    }
+]
