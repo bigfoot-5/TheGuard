@@ -10,12 +10,14 @@ from llm_runner import generate_response
 from scoring.format_compliance import score_format_compliance
 from scoring.semantic_similarity import score_semantic_similarity
 from scoring.llm_judge import score_persuasiveness, score_factual_grounding
-from scoring.confidence_calibration import calculate_ece, score_insurance_intent
+from scoring.confidence_calibration import calculate_ece
 from stats.statistical_engine import calculate_paired_bootstrap, evaluate_decision_gate, calculate_mcnemar
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # --- TELEMETRY & BASELINE STORAGE ---
 def save_eval_results(task_name: str, averages_dict: dict, raw_arrays_dict: dict, provider: str = "gpt-4o-mini"):
-    history_path = "data/history.json"
+    history_path = os.path.join(BASE_DIR, "data/history.json")
     os.makedirs(os.path.dirname(history_path), exist_ok=True)
     
     if os.path.exists(history_path):
@@ -37,7 +39,7 @@ def save_eval_results(task_name: str, averages_dict: dict, raw_arrays_dict: dict
 
 def load_latest_baseline():
     """Loads the most recent raw arrays from history.json to use as the baseline."""
-    history_path = "data/history.json"
+    history_path = os.path.join(BASE_DIR, "data/history.json")
     if not os.path.exists(history_path): return None
     
     with open(history_path, "r") as f:
@@ -52,9 +54,14 @@ def load_latest_baseline():
 # --- EVALUATORS ---
 def evaluate_deal_copy(model: str):
     print(f"\n[1/3] ⏳ Evaluating Deal Copy against {model}...")
-    with open("data/deal_copy_cases.json", "r") as f: cases = json.load(f)[:5] 
+    with open(os.path.join(BASE_DIR, "data/deal_copy_cases.json"), "r") as f: cases = json.load(f)[:5]
+    try:
+        with open(os.path.join(BASE_DIR, "prompts/system_assistant_389c7a3e.txt"), "r") as f:
+            prompt = f.read()
+    except FileNotFoundError:
+        prompt = "You are a marketing assistant. Write short, punchy deal copy."
+
     scores = {"compliance": [], "similarity": [], "persuasiveness": []}
-    prompt = "You are a marketing assistant. Write short, punchy deal copy."
     for case in cases:
         user_input = f"Write deal copy for: {case['raw_deal_extraction']} at {case['merchant_name']}. Target Channel: {case['target_channel']}."
         output = generate_response(prompt, user_input, model=model)
@@ -65,32 +72,54 @@ def evaluate_deal_copy(model: str):
 
 def evaluate_credit_narrative(model: str):
     print(f"\n[2/3] ⏳ Evaluating Credit Faithfulness against {model}...")
-    with open("data/credit_narrative_cases.json", "r") as f: cases = json.load(f)[:5]
+    with open(os.path.join(BASE_DIR, "data/credit_narrative_cases.json"), "r") as f: cases = json.load(f)[:5]
     grounding_scores = []
-    prompt = "You are an underwriter. Summarize the merchant data factually. Do not invent numbers."
+    try:
+        with open(os.path.join(BASE_DIR, "prompts/system_underwriter_a93040d0.txt"), "r") as f: prompt = f.read()
+    except FileNotFoundError:
+        prompt = "You are an underwriter. Summarize the merchant data factually. Do not invent numbers."
     for case in cases:
-        user_input = f"Write a risk summary for merchant: {json.dumps(case['merchant_data'])}"
+        # Pass the whole 'case' dictionary
+        user_input = f"Write a risk summary for merchant: {json.dumps(case)}"
         output = generate_response(prompt, user_input, model=model)
-        grounding_scores.append(score_factual_grounding(case['merchant_data'], output))
+        grounding_scores.append(score_factual_grounding(case, output))
     return {"grounding": grounding_scores}
 
 def evaluate_insurance_intent(model: str):
     print(f"\n[3/3] ⏳ Evaluating Insurance Intent against {model}...")
-    with open("data/insurance_intent_cases.json", "r") as f: cases = json.load(f)[:5]
+    with open(os.path.join(BASE_DIR, "data/insurance_intent_cases.json"), "r") as f: cases = json.load(f)[:5]
     predictions = []
-    prompt = "Classify this cart into one insurance category. Respond ONLY with JSON: {'intent': 'Category Name', 'confidence': 0.95}"
+    try:
+        with open(os.path.join(BASE_DIR, "prompts/system_insurance_classifier_b5a8b780.txt"), "r") as f:
+            prompt = f.read()
+    except FileNotFoundError:
+        prompt = "Classify this cart into one insurance category. Respond ONLY with JSON: {'intent': 'Category Name', 'confidence': 0.95}"
+        
+    allowed_categories = [
+        "Electronics Damage Protection", 
+        "Travel Cancellation", 
+        "Fraud/Cyber Protection", 
+        "Health/Accident", 
+        "No Insurance Applicable"
+    ]
+    
     for case in cases:
-        user_input = f"Cart contents: {case['cart_contents']}. Categories: {case['available_categories']}"
+        user_input = f"Cart contents: {case['cart_contents']}. Device: {case['user_device_type']}. History: {case['historical_purchase_flags']}. Allowed Categories: {allowed_categories}"
+        
         output_str = generate_response(prompt, user_input, model=model, temperature=0.1)
+        
         try:
             output_json = json.loads(output_str.strip('` \n').replace('json\n', ''))
             is_correct = (output_json.get("intent") == case['expected_intent'])
             confidence = float(output_json.get("confidence", 0.5))
         except:
             is_correct, confidence = False, 1.0 
+            
         predictions.append({'is_correct': is_correct, 'confidence': confidence})
+        
     intent_scores = [1.0 if p['is_correct'] else 0.0 for p in predictions]
     raw_ece = calculate_ece(predictions) 
+    
     return {"intent_score": intent_scores, "ece": raw_ece}
 
 # --- MAIN ORCHESTRATOR ---
@@ -107,7 +136,9 @@ def main():
     current_raw_arrays = {
         "similarity": candidate_deal["similarity"],
         "persuasiveness": candidate_deal["persuasiveness"],
-        "grounding": candidate_credit["grounding"]
+        "grounding": candidate_credit["grounding"],
+        "compliance": candidate_deal["compliance"],
+        "intent_score": candidate_insurance["intent_score"]  
     }
     
     current_averages = {
@@ -129,8 +160,7 @@ def main():
         print("✅ GO: Pipeline initialized. Safe for deployment.")
         sys.exit(0)
         
-    # 4. STATISTICAL COMPARISON ENGINE (If baseline exists)
-    # 4. STATISTICAL COMPARISON ENGINE (If baseline exists)
+    # 4. STATISTICAL COMPARISON ENGINE 
     print("\n📊 Executing Phase 5: Statistical Comparison Engine...")
     
     # We map every metric, its data arrays, AND its statistical type

@@ -15,22 +15,28 @@ st.markdown("Real-time observability for Agentic LLM performance and regression 
 # REAL DATA LOADER
 # ==========================================
 def load_data():
-    """
-    Reads the actual results saved by the run_evals.py pipeline.
-    If the file doesn't exist yet, it loads a structured empty DataFrame.
-    """
     history_path = "eval_pipeline/data/history.json"
-    
     if os.path.exists(history_path):
         with open(history_path, "r") as f:
-            data = json.load(f)
-        return pd.DataFrame(data)
+            raw_data = json.load(f)
+            
+        # Flatten the nested 'averages' dict into the main row
+        flattened_data = []
+        for entry in raw_data:
+            flat_entry = {
+                "timestamp": entry.get("timestamp"),
+                "version": entry.get("version", "latest"),
+                "task": entry.get("task"),
+                "provider": entry.get("provider")
+            }
+            # Merge the averages in
+            if "averages" in entry:
+                flat_entry.update(entry["averages"])
+            flattened_data.append(flat_entry)
+            
+        return pd.DataFrame(flattened_data)
     else:
-        # Fallback empty dataframe matching the required schema
-        return pd.DataFrame(columns=[
-            "timestamp", "version", "task", "provider", 
-            "grounding", "compliance", "similarity", "ece"
-        ])
+        return pd.DataFrame(columns=["timestamp", "version", "task", "provider", "grounding", "compliance", "similarity", "ece", "intent_accuracy"])
 
 df = load_data()
 
