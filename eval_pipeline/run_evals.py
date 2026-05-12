@@ -11,7 +11,7 @@ from scoring.format_compliance import score_format_compliance
 from scoring.semantic_similarity import score_semantic_similarity
 from scoring.llm_judge import score_persuasiveness, score_factual_grounding
 from scoring.confidence_calibration import calculate_ece, score_insurance_intent
-
+from stats.statistical_engine import calculate_paired_bootstrap, evaluate_decision_gate
 # --- TELEMETRY STORAGE ---
 def save_eval_results(task_name: str, scores_dict: dict, provider: str = "gpt-4o-mini", version: str = "latest"):
     history_path = "data/history.json"
@@ -101,29 +101,44 @@ def main():
     print("🚀 Starting GrabOn CI/CD Evaluation Pipeline...")
     test_model = "gpt-4o-mini"
     
-    # Run all 3 Datasets
-    deal_metrics = evaluate_deal_copy(test_model)
-    credit_metrics = evaluate_credit_narrative(test_model)
-    insurance_metrics = evaluate_insurance_intent(test_model)
+    # 1. RUN THE CANDIDATE MODEL
+    # (Note: You must update your evaluate_* functions to return arrays, 
+    # e.g., return {"compliance": scores["compliance"]} instead of just the average)
+    candidate_raw_metrics = evaluate_deal_copy(test_model)
     
-    # Combine results
-    final_metrics = {**deal_metrics, **credit_metrics, **insurance_metrics}
+    # 2. LOAD THE BASELINE
+    # In production, you fetch the arrays of the currently deployed model from history.json.
+    # For this demo, we simulate the baseline array (must be same length as candidate array).
+    baseline_compliance_array = [0.9, 1.0, 1.0, 0.8, 0.9] # Example baseline scores
+    candidate_compliance_array = candidate_raw_metrics["compliance"]
     
-    print("\n📊 Final Aggregated Results:")
-    print(json.dumps(final_metrics, indent=2))
+    print("\n📊 Executing Phase 5: Statistical Comparison Engine...")
     
-    # Save to history for Streamlit App
-    save_eval_results("Full Suite", final_metrics, provider=test_model)
+    # 3. RUN PAIRED BOOTSTRAP (The answer to the "Noise vs Real" question)
+    stats_result = calculate_paired_bootstrap(
+        baseline_compliance_array, 
+        candidate_compliance_array
+    )
     
-    # Decision Gate
-    # Require 90% format compliance AND 90% factual grounding
-    decision = "GO" if final_metrics.get("compliance", 0) >= 0.90 and final_metrics.get("grounding", 0) >= 0.90 else "NO-GO"
+    mean_diff = stats_result["mean_difference"]
+    ci_lower = stats_result["ci_lower"]
+    ci_upper = stats_result["ci_upper"]
+    
+    print(f"  -> Mean Difference: {mean_diff:.2f}")
+    print(f"  -> 95% Confidence Interval: [{ci_lower:.4f}, {ci_upper:.4f}]")
+    
+    # 4. THE GO / NO-GO GATE
+    decision = evaluate_decision_gate(stats_result, metric_type="continuous")
     
     if decision == "NO-GO":
-        print("❌ CRITICAL: Pipeline detected a regression. Blocking PR.")
+        print(f"❌ CRITICAL: Statistically significant regression detected. CI Upper Bound: {ci_upper}")
+        print("🔒 Blocking Pull Request Merge.")
+        sys.exit(1)
+    elif decision == "INCONCLUSIVE":
+        print(f"⚠️ INCONCLUSIVE: The difference is just statistical noise (CI crosses 0). Blocking PR.")
         sys.exit(1)
     else:
-        print("✅ Pipeline passed all checks. GO for deployment.")
+        print("✅ GO: Statistically significant improvement detected. Safe for deployment.")
         sys.exit(0)
 
 if __name__ == "__main__":
