@@ -1,0 +1,22 @@
+{
+    "c6bcbf50": {
+        "prompt_name": "system_assistant",
+        "timestamp": "2026-05-11T17:38:18.471295",
+        "author": "karthik_t",
+        "model_config": {
+            "model": "gpt-4o-mini",
+            "temperature": 0.2
+        },
+        "eval_status": "PENDING"
+    },
+    "389c7a3e": {
+        "prompt_name": "system_assistant",
+        "timestamp": "2026-05-11T17:38:18.471563",
+        "author": "karthik_t",
+        "model_config": {
+            "model": "gpt-4o-mini",
+            "temperature": 0.2
+        },
+        "eval_status": "PENDING"
+    }
+}
