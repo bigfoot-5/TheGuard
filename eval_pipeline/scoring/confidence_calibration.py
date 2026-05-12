@@ -41,26 +41,6 @@ def calculate_ece(predictions: List[Dict], num_bins: int = 10) -> float:
         
     return ece
 
-def score_insurance_intent(predictions: List[Dict], w1: float = 0.7, w2: float = 0.3) -> float:
-    """
-    Calculates the final normalized score combining Accuracy and ECE.
-    Score = (w1 * Accuracy) + (w2 * (1 - ECE))
-    """
-    if not predictions:
-        return 0.0
-        
-    # Calculate Overall Accuracy
-    correct_predictions = sum(1 for p in predictions if p['is_correct'])
-    accuracy = correct_predictions / len(predictions)
-    
-    # Calculate Expected Calibration Error
-    ece = calculate_ece(predictions)
-    
-    # Calculate Final Score
-    final_score = (w1 * accuracy) + (w2 * (1.0 - ece))
-    
-    return round(final_score, 4)
-
 # ==========================================
 # QUICK TEST RUNNER
 # ==========================================
@@ -78,10 +58,8 @@ if __name__ == "__main__":
     ]
     
     ece_perfect = calculate_ece(perfect_model)
-    score_perfect = score_insurance_intent(perfect_model)
     print(f"Perfectly Calibrated Model:")
-    print(f" -> ECE: {round(ece_perfect, 4)} (Closer to 0 is better)")
-    print(f" -> Final Score: {score_perfect}\n")
+    print(f" -> ECE: {round(ece_perfect, 4)} (Closer to 0 is better)\n")
     
     # Scenario 2: A dangerously overconfident model (Hallucinating)
     # It gets things wrong, but claims 99% confidence anyway.
@@ -94,7 +72,5 @@ if __name__ == "__main__":
     ]
     
     ece_dangerous = calculate_ece(dangerous_model)
-    score_dangerous = score_insurance_intent(dangerous_model)
     print(f"Dangerously Overconfident Model:")
-    print(f" -> ECE: {round(ece_dangerous, 4)} (High penalty!)")
-    print(f" -> Final Score: {score_dangerous} (Score drops due to overconfidence penalty!)")
+    print(f" -> ECE: {round(ece_dangerous, 4)} (High penalty for overconfidence!)")

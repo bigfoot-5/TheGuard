@@ -39,7 +39,8 @@ def calculate_mcnemar(baseline_passes: list[bool], candidate_passes: list[bool])
 # ==========================================
 def calculate_paired_bootstrap(baseline_scores: list[float], candidate_scores: list[float]) -> dict:
     """
-    Executes 10,000 paired bootstrap resamples to find the 95% Confidence Interval.
+    Executes 10,000 paired bootstrap resamples to find the 95% Confidence Interval
+    and calculates the empirical p-value.
     """
     # Calculate the raw differences between the paired scores
     diffs = np.array(candidate_scores) - np.array(baseline_scores)
@@ -47,16 +48,26 @@ def calculate_paired_bootstrap(baseline_scores: list[float], candidate_scores: l
     
     # If all differences are exactly 0, scipy bootstrap will crash. Handle edge case:
     if np.all(diffs == 0):
-        return {"mean_difference": 0.0, "ci_lower": 0.0, "ci_upper": 0.0}
+        return {"mean_difference": 0.0, "ci_lower": 0.0, "ci_upper": 0.0, "p_value": 1.0}
 
     # Execute Paired Bootstrap Resampling
     res = stats.bootstrap((diffs,), np.mean, confidence_level=0.95, method='percentile')
     ci_lower, ci_upper = res.confidence_interval
     
+    # Extract the 10,000 resampled means
+    distribution = res.bootstrap_distribution[0]
+    
+    # Calculate empirical 2-sided p-value
+    # It counts what fraction of the 10,000 resamples crossed the 0 line
+    p_less = np.mean(distribution <= 0)
+    p_greater = np.mean(distribution >= 0)
+    p_value = 2 * min(p_less, p_greater)
+    
     return {
         "mean_difference": round(mean_diff, 4),
         "ci_lower": round(ci_lower, 4),
-        "ci_upper": round(ci_upper, 4)
+        "ci_upper": round(ci_upper, 4),
+        "p_value": round(p_value, 4)  # <-- The new p-value!
     }
 
 # ==========================================
