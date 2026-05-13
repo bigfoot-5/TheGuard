@@ -437,5 +437,40 @@
                 0.0
             ]
         }
+    },
+    {
+        "timestamp": "2026-05-13 20:10:50",
+        "task": "Full Config Suite",
+        "provider": "gpt-4o-mini",
+        "commit_hash": "05efa59",
+        "status": "GO (BASELINE)",
+        "averages": {
+            "format_compliance": 0.1,
+            "semantic_similarity": 0.8823599999999999,
+            "intent_accuracy": 0.0
+        },
+        "raw_arrays": {
+            "format_compliance": [
+                0.5,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+            ],
+            "semantic_similarity": [
+                0.8355,
+                0.8946,
+                0.9,
+                0.9124,
+                0.8693
+            ],
+            "intent_accuracy": [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+            ]
+        }
     }
 ]
