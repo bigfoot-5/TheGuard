@@ -18,6 +18,7 @@ jobs:
         uses: actions/checkout@v4        
         with:          
           fetch-depth: 0 # Required to generate git diffs against the base branch      
+          token: ${{ secrets.GH_PAT }}
           
       - name: Set up Python 3.10 Environment        
         uses: actions/setup-python@v5        
