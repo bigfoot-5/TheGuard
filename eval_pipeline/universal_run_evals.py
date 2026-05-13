@@ -4,6 +4,7 @@ import json
 import yaml
 import subprocess
 from datetime import datetime
+import time
 
 # Import LLM Runner, Stats Engine, and our new Registry
 from llm_runner import generate_response
@@ -122,6 +123,8 @@ def main():
                 
                 score = scoring_function(case, output)
                 current_raw_arrays[reg_key].append(score)
+            if "gemini" in model.lower():
+                time.sleep(15)
 
     # Calculate averages for telemetry
     for key, array in current_raw_arrays.items():

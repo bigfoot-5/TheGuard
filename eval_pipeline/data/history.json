@@ -472,5 +472,75 @@
                 0.0
             ]
         }
+    },
+    {
+        "timestamp": "2026-05-13 20:13:30",
+        "task": "Full Config Suite",
+        "provider": "gpt-4o-mini",
+        "commit_hash": "15570d5",
+        "status": "GO (STABLE)",
+        "averages": {
+            "format_compliance": 0.2,
+            "semantic_similarity": 0.87996,
+            "intent_accuracy": 0.0
+        },
+        "raw_arrays": {
+            "format_compliance": [
+                0.5,
+                0.0,
+                0.5,
+                0.0,
+                0.0
+            ],
+            "semantic_similarity": [
+                0.8323,
+                0.8978,
+                0.9018,
+                0.9022,
+                0.8657
+            ],
+            "intent_accuracy": [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+            ]
+        }
+    },
+    {
+        "timestamp": "2026-05-13 22:11:56",
+        "task": "Full Config Suite",
+        "provider": "gpt-4o-mini",
+        "commit_hash": "15570d5",
+        "status": "NO-GO",
+        "averages": {
+            "format_compliance": 0.1,
+            "semantic_similarity": 0.84092,
+            "intent_accuracy": 0.0
+        },
+        "raw_arrays": {
+            "format_compliance": [
+                0.5,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+            ],
+            "semantic_similarity": [
+                0.7776,
+                0.8736,
+                0.8551,
+                0.8913,
+                0.807
+            ],
+            "intent_accuracy": [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+            ]
+        }
     }
 ]

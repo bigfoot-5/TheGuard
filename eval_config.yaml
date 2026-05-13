@@ -4,21 +4,23 @@ global:
 
 tasks:
   deal_copy:
+    model: "claude-haiku-4-5-20251001" # <--- ADD THIS LINE! This overrides the global default.
     dataset: "eval_pipeline/data/deal_copy_cases.json"
     prompt_file: "eval_pipeline/prompts/system_assistant_389c7a3e.txt"
     input_template: "Write deal copy for: {raw_deal_extraction} at {merchant_name}. Target Channel: {target_channel}."
     metrics:
       - name: "Format Compliance"
         registry_key: "format_compliance"
-        type: "continuous"
+        type: "binary"
       - name: "Semantic Similarity"
         registry_key: "semantic_similarity"
         type: "continuous"
 
   insurance_intent:
+    model: "claude-haiku-4-5-20251001" # <--- ADD THIS LINE!
     dataset: "eval_pipeline/data/insurance_intent_cases.json"
     prompt_file: "eval_pipeline/prompts/system_insurance_classifier_b5a8b780.txt"
-    temperature: 0.1 # Override default
+    temperature: 0.1 # Override default temperature
     input_template: "Cart contents: {cart_contents}. Device: {user_device_type}. History: {historical_purchase_flags}."
     metrics:
       - name: "Intent Accuracy"
