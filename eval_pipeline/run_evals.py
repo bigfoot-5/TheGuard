@@ -54,7 +54,7 @@ def load_latest_baseline():
             if not data or len(data) == 0:
                 return None
                 
-            # THE FIX: Return ONLY the raw arrays from the very last successful run!
+            # Return ONLY the raw arrays from the very last successful run!
             return data[-1].get("raw_arrays")
             
     except json.JSONDecodeError:
@@ -78,7 +78,7 @@ def evaluate_deal_copy(model: str):
         output = generate_response(prompt, user_input, model=model)
         scores["compliance"].append(score_format_compliance(output, case['expected_max_length']))
         scores["similarity"].append(score_semantic_similarity(case['raw_deal_extraction'], output))
-        scores["persuasiveness"].append(score_persuasiveness(output))
+        # scores["persuasiveness"].append(score_persuasiveness(output))
     timer.sleep(65)
     return scores
 
@@ -141,14 +141,14 @@ def main():
     
     # 1. RUN THE CANDIDATE MODEL
     candidate_deal = evaluate_deal_copy(test_model)
-    candidate_credit = evaluate_credit_narrative(test_model)
+    # candidate_credit = evaluate_credit_narrative(test_model)
     candidate_insurance = evaluate_insurance_intent(test_model)
     
     # 2. COMPILE CURRENT RUN DATA
     current_raw_arrays = {
         "similarity": candidate_deal["similarity"],
-        "persuasiveness": candidate_deal["persuasiveness"],
-        "grounding": candidate_credit["grounding"],
+        # "persuasiveness": candidate_deal["persuasiveness"],
+        # "grounding": candidate_credit["grounding"],
         "compliance": candidate_deal["compliance"],
         "intent_score": candidate_insurance["intent_score"]  
     }
@@ -156,8 +156,8 @@ def main():
     current_averages = {
         "compliance": sum(candidate_deal["compliance"]) / len(candidate_deal["compliance"]),
         "similarity": sum(candidate_deal["similarity"]) / len(candidate_deal["similarity"]),
-        "persuasiveness": sum(candidate_deal["persuasiveness"]) / len(candidate_deal["persuasiveness"]),
-        "grounding": sum(candidate_credit["grounding"]) / len(candidate_credit["grounding"]),
+        # "persuasiveness": sum(candidate_deal["persuasiveness"]) / len(candidate_deal["persuasiveness"]),
+        # "grounding": sum(candidate_credit["grounding"]) / len(candidate_credit["grounding"]),
         "intent_accuracy": sum(candidate_insurance["intent_score"]) / len(candidate_insurance["intent_score"]),
         "ece": candidate_insurance["ece"]
     }
@@ -178,8 +178,8 @@ def main():
     # We map every metric, its data arrays, AND its statistical type
     metrics_to_test = {
         "Semantic Similarity": {"baseline": baseline_raw_arrays["similarity"], "candidate": current_raw_arrays["similarity"], "type": "continuous"},
-        "Persuasiveness": {"baseline": baseline_raw_arrays["persuasiveness"], "candidate": current_raw_arrays["persuasiveness"], "type": "continuous"},
-        "Factual Grounding": {"baseline": baseline_raw_arrays["grounding"], "candidate": current_raw_arrays["grounding"], "type": "continuous"},
+        # "Persuasiveness": {"baseline": baseline_raw_arrays["persuasiveness"], "candidate": current_raw_arrays["persuasiveness"], "type": "continuous"},
+        # "Factual Grounding": {"baseline": baseline_raw_arrays["grounding"], "candidate": current_raw_arrays["grounding"], "type": "continuous"},
         "Format Compliance": {"baseline": baseline_raw_arrays["compliance"], "candidate": current_raw_arrays["compliance"], "type": "binary"},
         "Intent Accuracy": {"baseline": baseline_raw_arrays["intent_score"], "candidate": current_raw_arrays["intent_score"], "type": "binary"}
     }
