@@ -40,21 +40,25 @@ def save_eval_results(task_name: str, averages_dict: dict, raw_arrays_dict: dict
     with open(history_path, "w") as f: json.dump(history, f, indent=4)
 
 def load_latest_baseline():
+    """Loads the most recent raw arrays from history.json to use as the baseline."""
     history_path = os.path.join(BASE_DIR, "data/history.json")
     
-    if not os.path.exists(history_path):
+    if not os.path.exists(history_path): 
         return None
         
     try:
         with open(history_path, "r") as f:
             data = json.load(f)
+            
             # If the file is valid JSON but empty, treat it as no baseline
-            if not data:
+            if not data or len(data) == 0:
                 return None
-            return data
+                
+            # THE FIX: Return ONLY the raw arrays from the very last successful run!
+            return data[-1].get("raw_arrays")
+            
     except json.JSONDecodeError:
-        # If the file is completely blank (0 bytes) or corrupted, 
-        # catch the crash and safely trigger a Cold Start!
+        # If the file is completely blank (0 bytes) or corrupted, catch the crash
         print("⚠️ WARNING: history.json is corrupted or completely blank.")
         return None
 
