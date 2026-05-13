@@ -3,6 +3,7 @@ import pandas as pd
 import json
 import os
 import plotly.express as px
+import subprocess
 
 # ==========================================
 # CONFIG & STYLING
@@ -12,12 +13,35 @@ st.title("🛡️ GrabOn AI Labs: Telemetry Dashboard")
 st.markdown("Real-time observability for Agentic LLM performance and regression tracking.")
 
 # ==========================================
+# LIVE GIT INTEGRATION
+# ==========================================
+def get_real_prompt_diff(commit_hash):
+    """Dynamically pulls the git diff for the prompts folder at a specific commit."""
+    if commit_hash == "unknown":
+        return "No commit hash available to fetch diff."
+    
+    try:
+        # git show <hash> -- <path> returns the exact diff for that folder
+        result = subprocess.run(
+            ["git", "show", commit_hash, "--", "eval_pipeline/prompts/"],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        diff_text = result.stdout
+        if not diff_text.strip():
+            return "No prompt files were changed in this commit."
+        return diff_text
+    except subprocess.CalledProcessError:
+        return f"Could not retrieve Git diff for commit: {commit_hash}. Ensure it exists in the local Git tree."
+
+# ==========================================
 # REAL DATA LOADER
 # ==========================================
 def load_data():
     history_path = "eval_pipeline/data/history.json"
     
-    # Graceful fallback: If no artifact has been downloaded yet
+    # Graceful fallback: If no artifact exists
     if not os.path.exists(history_path):
         return pd.DataFrame()
 
@@ -27,16 +51,16 @@ def load_data():
         except json.JSONDecodeError:
             return pd.DataFrame()
         
-    # Flatten the nested 'averages' dict into the main row
     flattened_data = []
     for entry in raw_data:
         flat_entry = {
             "timestamp": entry.get("timestamp"),
             "commit_hash": entry.get("commit_hash", "unknown"),
+            "status": entry.get("status", "GO (LEGACY)"), # Defaults to GO for older runs
             "task": entry.get("task", "Full Suite"),
             "provider": entry.get("provider", "gpt-4o-mini")
         }
-        # Merge the computed averages in
+        # Merge whatever averages exist (adapts dynamically to any schema)
         if "averages" in entry:
             flat_entry.update(entry["averages"])
         flattened_data.append(flat_entry)
@@ -51,76 +75,104 @@ df = load_data()
 st.sidebar.header("Filter Analytics")
 
 if not df.empty:
-    # Engineers filter the telemetry by Output Type, Model, and Git Commit.
     selected_task = st.sidebar.selectbox("Select Output Type", options=["All"] + list(df['task'].unique()))
-    selected_provider = st.sidebar.selectbox("LLM Provider", options=["All"] + list(df['provider'].unique()))
+    selected_status = st.sidebar.selectbox("Pipeline Status", options=["All", "GO", "NO-GO", "INCONCLUSIVE"])
     
-    # Apply filters
     filtered_df = df.copy()
     if selected_task != "All":
         filtered_df = filtered_df[filtered_df['task'] == selected_task]
-    if selected_provider != "All":
-        filtered_df = filtered_df[filtered_df['provider'] == selected_provider]
+    if selected_status != "All":
+        # Fuzzy match for status (e.g. "GO" matches "GO (STABLE)" and "GO (IMPROVED)")
+        filtered_df = filtered_df[filtered_df['status'].str.contains(selected_status)]
 else:
-    st.sidebar.warning("No evaluation history found. Run the local eval pipeline or download a GitHub Artifact to generate the baseline.")
+    st.sidebar.warning("No evaluation history found. Run the pipeline to generate baseline.")
     filtered_df = df
 
 # ==========================================
 # MAIN DASHBOARD METRICS
 # ==========================================
 if not filtered_df.empty:
-    col1, col2, col3, col4 = st.columns(4)
+    # Dynamically extract whatever metrics are in the dataframe (ignoring metadata columns)
+    metadata_cols = ["timestamp", "commit_hash", "status", "task", "provider"]
+    available_metrics = [col for col in filtered_df.columns if col not in metadata_cols]
 
-    with col1:
-        avg_compliance = filtered_df.get('compliance', pd.Series([0])).mean()
-        st.metric("Format Compliance", f"{avg_compliance:.2%}")
-
-    with col2:
-        avg_similarity = filtered_df.get('similarity', pd.Series([0])).mean()
-        st.metric("Semantic Similarity", f"{avg_similarity:.2%}")
-
-    with col3:
-        avg_intent = filtered_df.get('intent_accuracy', pd.Series([0])).mean()
-        st.metric("Intent Accuracy", f"{avg_intent:.2%}")
-        
-    with col4:
-        avg_ece = filtered_df.get('ece', pd.Series([0])).mean()
-        st.metric("Expected Calibration Error", f"{avg_ece:.4f}", delta_color="inverse")
+    # Show top-level metric averages
+    cols = st.columns(min(len(available_metrics), 4))
+    for i, metric in enumerate(available_metrics[:4]):
+        with cols[i]:
+            avg_val = filtered_df[metric].mean()
+            # Format ECE differently than percentages
+            if "ece" in metric.lower():
+                st.metric(metric.replace("_", " ").title(), f"{avg_val:.4f}", delta_color="inverse")
+            else:
+                st.metric(metric.replace("_", " ").title(), f"{avg_val:.2%}")
 
     # ==========================================
     # PERFORMANCE TRENDS 
     # ==========================================
     st.subheader("📈 Quality Trends Over Time")
     
-    # Dynamically plot whichever metrics exist in the JSON
-    metrics_to_plot = [m for m in ["compliance", "similarity", "intent_accuracy", "ece"] if m in filtered_df.columns]
+    # We only plot runs that actually deployed (GO or LEGACY). 
+    # NO-GOs shouldn't distort the active production trendline!
+    production_df = filtered_df[~filtered_df['status'].str.contains("NO-GO")]
     
-    fig = px.line(
-        filtered_df, 
-        x="timestamp", 
-        y=metrics_to_plot,
-        labels={"value": "Score", "variable": "Metric", "timestamp": "Execution Time"},
-        markers=True,
-        title="Rolling Average of Scoring Functions",
-        hover_data=["commit_hash", "task", "provider"] # Shows the commit hash when hovering over a point!
-    )
-    st.plotly_chart(fig, use_container_width=True)
+    if not production_df.empty:
+        fig = px.line(
+            production_df, 
+            x="timestamp", 
+            y=available_metrics,
+            labels={"value": "Score", "variable": "Metric", "timestamp": "Execution Time"},
+            markers=True,
+            title="Production Quality (Excluding Blocked PRs)",
+            hover_data=["commit_hash", "status", "task"] 
+        )
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.info("No successful production deployments to plot yet.")
 
     # ==========================================
-    # HISTORICAL COMMIT LOG (The Rubric Winner)
+    # HISTORICAL COMMIT LOG
     # ==========================================
     st.subheader("🔍 Regression Root Cause Analysis (Commit Log)")
-    st.info("Use this table to trace exact performance drops back to the Git commit that caused them. If Telugu translation quality dropped, find the anomalous row and grab the associated Commit Hash to view the prompt diff.")
+    st.info("Use this log to trace exact performance drops back to the Git commit that caused them. Failed NO-GO runs are recorded here for auditing.")
     
-    # Dynamically build columns so it doesn't crash if a metric is missing
-    cols_to_show = ["timestamp", "commit_hash", "task", "provider"]
-    cols_to_show.extend(metrics_to_plot)
-    
-    # Sort by newest first
+    cols_to_show = ["timestamp", "status", "commit_hash"] + available_metrics
     log_df = filtered_df[cols_to_show].sort_values(by="timestamp", ascending=False)
     
-    # Display the interactive dataframe
-    st.dataframe(log_df, use_container_width=True, hide_index=True)
+    # Optional: Highlight NO-GO rows using Pandas styling
+    def highlight_status(val):
+        if isinstance(val, str):
+            if 'NO-GO' in val: return 'color: #ff4b4b; font-weight: bold'
+            if 'IMPROVED' in val: return 'color: #00cc96; font-weight: bold'
+            if 'STABLE' in val: return 'color: #888888'
+        return ''
+    
+    st.dataframe(log_df.style.map(highlight_status), use_container_width=True, hide_index=True)
+
+    # ==========================================
+    # LIVE PROMPT DIFF EXPLORER
+    # ==========================================
+    st.subheader("🕵️ Live Prompt Diff Explorer")
+    st.write("Select a commit hash from the telemetry log to query the local Git tree and view the exact prompt changes that triggered this run.")
+    
+    valid_commits = log_df[log_df['commit_hash'] != 'unknown']['commit_hash'].dropna().unique()
+    
+    if len(valid_commits) > 0:
+        selected_commit = st.selectbox("Select Commit Hash to Inspect", valid_commits)
+        
+        # Look up the status of the selected commit to display a helpful warning
+        commit_status = log_df[log_df['commit_hash'] == selected_commit]['status'].iloc[0]
+        if "NO-GO" in commit_status:
+            st.error(f"🚨 This commit was blocked by the CI/CD Pipeline ({commit_status}). See diff below:")
+        elif "IMPROVED" in commit_status:
+            st.success(f"🎉 This commit improved production quality ({commit_status}). See diff below:")
+            
+        if selected_commit:
+            with st.spinner(f"Querying Git tree for commit {selected_commit}..."):
+                live_diff = get_real_prompt_diff(selected_commit)
+            st.code(live_diff, language="diff")
+    else:
+        st.info("No valid Git commits found in the telemetry history to generate diffs.")
 
 else:
     st.info("Awaiting pipeline execution. The charts will populate once `history.json` contains evaluation data.")

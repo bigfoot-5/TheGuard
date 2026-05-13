@@ -84,12 +84,12 @@ def evaluate_deal_copy(model: str):
     except FileNotFoundError:
         prompt = "You are a marketing assistant. Write short, punchy deal copy."
 
-    scores = {"compliance": [], "similarity": [], "persuasiveness": []}
+    scores = {"format_compliance": [], "semantic_similarity": [], "persuasiveness": []}
     for case in cases:
         user_input = f"Write deal copy for: {case['raw_deal_extraction']} at {case['merchant_name']}. Target Channel: {case['target_channel']}."
         output = generate_response(prompt, user_input, model=model)
-        scores["compliance"].append(score_format_compliance(output, case['expected_max_length']))
-        scores["similarity"].append(score_semantic_similarity(case['raw_deal_extraction'], output))
+        scores["format_compliance"].append(score_format_compliance(output, case['expected_max_length']))
+        scores["semantic_similarity"].append(score_semantic_similarity(case['raw_deal_extraction'], output))
         # scores["persuasiveness"].append(score_persuasiveness(output))
     timer.sleep(65)
     return scores
@@ -107,7 +107,7 @@ def evaluate_credit_narrative(model: str):
         user_input = f"Write a risk summary for merchant: {json.dumps(case)}"
         output = generate_response(prompt, user_input, model=model)
         grounding_scores.append(score_factual_grounding(case, output))
-    return {"grounding": grounding_scores}
+    return {"factual_grounding": grounding_scores}
 
 def evaluate_insurance_intent(model: str):
     print(f"\n[3/3] ⏳ Evaluating Insurance Intent against {model}...")
@@ -144,7 +144,7 @@ def evaluate_insurance_intent(model: str):
     intent_scores = [1.0 if p['is_correct'] else 0.0 for p in predictions]
     raw_ece = calculate_ece(predictions) 
     
-    return {"intent_score": intent_scores, "ece": raw_ece}
+    return {"intent_accuracy": intent_scores, "ece": raw_ece}
 
 # --- MAIN ORCHESTRATOR ---
 def main():
@@ -158,19 +158,19 @@ def main():
     
     # 2. COMPILE CURRENT RUN DATA
     current_raw_arrays = {
-        "similarity": candidate_deal["similarity"],
+        "semantic_similarity": candidate_deal["semantic_similarity"],
         # "persuasiveness": candidate_deal["persuasiveness"],
-        # "grounding": candidate_credit["grounding"],
-        "compliance": candidate_deal["compliance"],
-        "intent_score": candidate_insurance["intent_score"]  
+        # "factual_grounding": candidate_credit["factual_grounding"],
+        "format_compliance": candidate_deal["format_compliance"],
+        "intent_accuracy": candidate_insurance["intent_accuracy"]  
     }
     
     current_averages = {
-        "compliance": sum(candidate_deal["compliance"]) / len(candidate_deal["compliance"]),
-        "similarity": sum(candidate_deal["similarity"]) / len(candidate_deal["similarity"]),
+        "format_compliance": sum(candidate_deal["format_compliance"]) / len(candidate_deal["format_compliance"]),
+        "semantic_similarity": sum(candidate_deal["semantic_similarity"]) / len(candidate_deal["semantic_similarity"]),
         # "persuasiveness": sum(candidate_deal["persuasiveness"]) / len(candidate_deal["persuasiveness"]),
-        # "grounding": sum(candidate_credit["grounding"]) / len(candidate_credit["grounding"]),
-        "intent_accuracy": sum(candidate_insurance["intent_score"]) / len(candidate_insurance["intent_score"]),
+        # "factual_grounding": sum(candidate_credit["factual_grounding"]) / len(candidate_credit["factual_grounding"]),
+        "intent_accuracy": sum(candidate_insurance["intent_accuracy"]) / len(candidate_insurance["intent_accuracy"]),
         "ece": candidate_insurance["ece"]
     }
 
@@ -189,11 +189,11 @@ def main():
     
     # We map every metric, its data arrays, AND its statistical type
     metrics_to_test = {
-        "Semantic Similarity": {"baseline": baseline_raw_arrays["similarity"], "candidate": current_raw_arrays["similarity"], "type": "continuous"},
+        "Semantic Similarity": {"baseline": baseline_raw_arrays["semantic_similarity"], "candidate": current_raw_arrays["semantic_similarity"], "type": "continuous"},
         # "Persuasiveness": {"baseline": baseline_raw_arrays["persuasiveness"], "candidate": current_raw_arrays["persuasiveness"], "type": "continuous"},
-        # "Factual Grounding": {"baseline": baseline_raw_arrays["grounding"], "candidate": current_raw_arrays["grounding"], "type": "continuous"},
-        "Format Compliance": {"baseline": baseline_raw_arrays["compliance"], "candidate": current_raw_arrays["compliance"], "type": "binary"},
-        "Intent Accuracy": {"baseline": baseline_raw_arrays["intent_score"], "candidate": current_raw_arrays["intent_score"], "type": "binary"}
+        # "Factual Grounding": {"baseline": baseline_raw_arrays["factual_grounding"], "candidate": current_raw_arrays["factual_grounding"], "type": "continuous"},
+        "Format Compliance": {"baseline": baseline_raw_arrays["format_compliance"], "candidate": current_raw_arrays["format_compliance"], "type": "binary"},
+        "Intent Accuracy": {"baseline": baseline_raw_arrays["intent_accuracy"], "candidate": current_raw_arrays["intent_accuracy"], "type": "binary"}
     }
 
     final_decision = "GO"
