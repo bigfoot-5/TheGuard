@@ -4,6 +4,7 @@ import os
 import json
 from datetime import datetime
 import time as timer
+import subprocess
 
 # Import LLM Runner
 from llm_runner import generate_response
@@ -18,9 +19,19 @@ from stats.statistical_engine import calculate_paired_bootstrap, evaluate_decisi
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # --- TELEMETRY & BASELINE STORAGE ---
+def get_current_commit():
+    try:
+        # Grabs the short 7-character Git commit hash
+        commit_hash = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('utf-8').strip()
+        return commit_hash
+    except Exception:
+        return "unknown_commit"
+
 def save_eval_results(task_name: str, averages_dict: dict, raw_arrays_dict: dict, provider: str = "gpt-4o-mini"):
     history_path = os.path.join(BASE_DIR, "data/history.json")
     os.makedirs(os.path.dirname(history_path), exist_ok=True)
+    
+    commit_hash = get_current_commit()
     
     if os.path.exists(history_path):
         with open(history_path, "r") as f:
@@ -33,6 +44,7 @@ def save_eval_results(task_name: str, averages_dict: dict, raw_arrays_dict: dict
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "task": task_name, 
         "provider": provider,
+        "commit_hash": commit_hash,
         "averages": averages_dict,
         "raw_arrays": raw_arrays_dict
     }

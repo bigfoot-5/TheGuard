@@ -6,19 +6,19 @@ on:
       - 'models/**'      
       - 'tools/**'      
       - 'eval_pipeline/**'
+
 jobs:  
   run_eval_pipeline:    
     name: Execute Statistical Eval Harness    
     runs-on: ubuntu-latest    
     permissions:      
-      contents: write     
-      pull-requests: write # Required to post the evaluation report comment          
+      contents: read        # Locked down: Bot no longer needs push access
+      pull-requests: write  # Required to post the evaluation report comment          
     steps:      
       - name: Checkout Repository        
         uses: actions/checkout@v4        
         with:          
           fetch-depth: 0 # Required to generate git diffs against the base branch      
-          token: ${{ secrets.GH_PAT }}
           
       - name: Set up Python 3.10 Environment        
         uses: actions/setup-python@v5        
@@ -53,23 +53,15 @@ jobs:
       - name: Enforce GO/NO-GO Gate        
         if: failure()        
         run: |
-          echo "::error::Evaluation pipeline detected a statistically significant regression  or inconclusive result. Merge is blocked."          
+          echo "::error::Evaluation pipeline detected a statistically significant regression or inconclusive result. Merge is blocked."          
           exit 1
 
-      - name: Update Telemetry Dashboard
-        if: success()
-        run: |
-          # 1. Look at the true PR branch head, not GitHub's temporary merge commit!
-          LAST_MSG=$(git log -1 --pretty=%B origin/${{ github.head_ref }})
-          
-          if [[ "$LAST_MSG" == *"chore: update eval telemetry"* ]]; then
-            echo "🛑 Circuit breaker engaged: Telemetry was already updated. Stopping the loop."
-            exit 0
-          fi
-          
-          # 2. If it's a human commit, update the dashboard
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add eval_pipeline/data/history.json
-          git commit -m "chore: update eval telemetry" || echo "No changes to commit"
-          git push origin HEAD:${{ github.head_ref }}
+      - name: Save Evaluation Artifacts        
+        if: always() # Guarantees the report and data save even if the PR fails the GO/NO-GO gate       
+        uses: actions/upload-artifact@v4        
+        with:          
+          name: eval-telemetry-and-report          
+          path: |            
+            eval_pipeline/data/history.json            
+            regression_report.md          
+          retention-days: 14
