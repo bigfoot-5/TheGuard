@@ -1,7 +1,9 @@
+from datetime import time
 import sys
 import os
 import json
 from datetime import datetime
+import time as timer
 
 # Import LLM Runner
 from llm_runner import generate_response
@@ -38,18 +40,23 @@ def save_eval_results(task_name: str, averages_dict: dict, raw_arrays_dict: dict
     with open(history_path, "w") as f: json.dump(history, f, indent=4)
 
 def load_latest_baseline():
-    """Loads the most recent raw arrays from history.json to use as the baseline."""
     history_path = os.path.join(BASE_DIR, "data/history.json")
-    if not os.path.exists(history_path): return None
     
-    with open(history_path, "r") as f:
-        try: history = json.load(f)
-        except: return None
+    if not os.path.exists(history_path):
+        return None
         
-    if not history or len(history) == 0: return None
-    
-    # Return the raw arrays from the very last successful run
-    return history[-1].get("raw_arrays")
+    try:
+        with open(history_path, "r") as f:
+            data = json.load(f)
+            # If the file is valid JSON but empty, treat it as no baseline
+            if not data:
+                return None
+            return data
+    except json.JSONDecodeError:
+        # If the file is completely blank (0 bytes) or corrupted, 
+        # catch the crash and safely trigger a Cold Start!
+        print("⚠️ WARNING: history.json is corrupted or completely blank.")
+        return None
 
 # --- EVALUATORS ---
 def evaluate_deal_copy(model: str):
@@ -68,6 +75,7 @@ def evaluate_deal_copy(model: str):
         scores["compliance"].append(score_format_compliance(output, case['expected_max_length']))
         scores["similarity"].append(score_semantic_similarity(case['raw_deal_extraction'], output))
         scores["persuasiveness"].append(score_persuasiveness(output))
+    timer.sleep(65)
     return scores
 
 def evaluate_credit_narrative(model: str):
