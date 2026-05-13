@@ -59,6 +59,14 @@ jobs:
       - name: Update Telemetry Dashboard
         if: success()
         run: |
+          # 1. The Circuit Breaker: Check the last commit message
+          LAST_MSG=$(git log -1 --pretty=%B)
+          if [[ "$LAST_MSG" == *"chore: update eval telemetry"* ]]; then
+            echo "🛑 Circuit breaker engaged: Telemetry was already updated. Stopping the loop."
+            exit 0
+          fi
+          
+          # 2. If it's a human commit, update the dashboard
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add eval_pipeline/data/history.json
