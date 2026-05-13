@@ -36,7 +36,8 @@ jobs:
         env:          
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}          
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }} 
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}       
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}    
+             
         run: |
           # The script runs the 3 tasks, 5 scoring functions, McNemar/Bootstrap tests,           
           # and determines the GO/NO-GO/INCONCLUSIVE state.
