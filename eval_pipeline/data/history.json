@@ -1,0 +1,36 @@
+[
+    {
+        "timestamp": "2026-05-13 07:40:41",
+        "task": "Full Suite",
+        "provider": "gpt-4o-mini",
+        "averages": {
+            "compliance": 0.0,
+            "similarity": 0.8793,
+            "intent_accuracy": 0.0,
+            "ece": 1.0
+        },
+        "raw_arrays": {
+            "similarity": [
+                0.8363,
+                0.9003,
+                0.8991,
+                0.9025,
+                0.8583
+            ],
+            "compliance": [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+            ],
+            "intent_score": [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+            ]
+        }
+    }
+]
