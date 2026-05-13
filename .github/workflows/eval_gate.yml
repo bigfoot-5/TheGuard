@@ -59,8 +59,9 @@ jobs:
       - name: Update Telemetry Dashboard
         if: success()
         run: |
-          # 1. The Circuit Breaker: Check the last commit message
-          LAST_MSG=$(git log -1 --pretty=%B)
+          # 1. Look at the true PR branch head, not GitHub's temporary merge commit!
+          LAST_MSG=$(git log -1 --pretty=%B origin/${{ github.head_ref }})
+          
           if [[ "$LAST_MSG" == *"chore: update eval telemetry"* ]]; then
             echo "🛑 Circuit breaker engaged: Telemetry was already updated. Stopping the loop."
             exit 0
