@@ -1,0 +1,16 @@
+Task,Case_ID,Model_Used,Regression_Detected,Total_Cost_USD,Latency_Seconds,Format Compliance,Semantic Similarity,Persuasiveness,Intent Accuracy,Confidence Calibration,Edge Case Safety,Factual Grounding
+deal_copy,deal_001,claude-haiku-4-5-20251001,True,8e-05,5.81,0.5,0.6724,0.8667,,,,
+deal_copy,deal_002,claude-haiku-4-5-20251001,True,8e-05,5.02,0.0,0.7692,0.9333,,,,
+deal_copy,deal_003,claude-haiku-4-5-20251001,True,8e-05,5.75,0.0,0.7145,0.8333,,,,
+deal_copy,deal_004,claude-haiku-4-5-20251001,True,6e-05,4.43,0.0,0.7419,0.8333,,,,
+deal_copy,deal_005,claude-haiku-4-5-20251001,True,9e-05,6.46,0.0,0.6576,0.8667,,,,
+insurance_intent,cart_001,gemini-2.5-flash,False,5e-05,5.28,,,,0.0,0.09999999999999998,1.0,
+insurance_intent,cart_002,gemini-2.5-flash,False,5e-05,5.53,,,,0.0,0.09999999999999998,1.0,
+insurance_intent,cart_003,gemini-2.5-flash,False,4e-05,5.21,,,,1.0,0.85,1.0,
+insurance_intent,cart_004,gemini-2.5-flash,False,4e-05,5.27,,,,1.0,0.85,1.0,
+insurance_intent,cart_005,gemini-2.5-flash,False,5e-05,5.34,,,,0.0,0.050000000000000044,1.0,
+credit_narrative,MSME001,llama-3.1-8b-instant,False,0.00033,10.64,,,,,,,0.5556
+credit_narrative,MSME002,llama-3.1-8b-instant,False,0.00034,9.97,,,,,,,0.5556
+credit_narrative,MSME003,llama-3.1-8b-instant,False,0.00031,13.76,,,,,,,0.5
+credit_narrative,MSME004,llama-3.1-8b-instant,False,0.00042,16.63,,,,,,,0.5
+credit_narrative,MSME005,llama-3.1-8b-instant,False,0.00033,11.88,,,,,,,0.4444

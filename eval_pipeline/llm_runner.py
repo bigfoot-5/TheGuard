@@ -2,66 +2,98 @@ import os
 import time
 from dotenv import load_dotenv
 from openai import OpenAI
-from google import genai
 import anthropic
+from google import genai
+import groq
 
 load_dotenv()
 
-oai_client = OpenAI()
-gemini_client = genai.Client()
+# Initialize all 4 Providers
+openai_client = OpenAI()
 claude_client = anthropic.Anthropic()
+google_client = genai.Client()
+groq_client = groq.Groq()
 
-def generate_response(system_prompt: str, user_input: str, model: str = "gpt-4o-mini", temperature: float = 0.2, max_retries: int = 3) -> str:
-    """Generates a text response with automatic retries for API Rate Limits."""
+# Cost per 1M tokens (Input, Output) in USD
+PRICING = {
+    "gpt-4o-mini": (0.15, 0.60),
+    "claude-3-5-haiku-20241022": (1.00, 5.00),
+    "gemini-1.5-flash": (0.075, 0.30),
+    "llama3-8b-8192": (0.05, 0.08) # Groq pricing (often free tier, but good to estimate)
+}
+
+def _calculate_cost(model: str, input_tokens: int, output_tokens: int) -> float:
+    rates = PRICING.get(model, (0.0, 0.0))
+    return (input_tokens / 1_000_000 * rates[0]) + (output_tokens / 1_000_000 * rates[1])
+
+def _execute_api_call(system_prompt: str, user_input: str, model: str, temperature: float) -> tuple[str, float]:
+    """Makes the raw API call and returns (response_text, cost)."""
     
+    # 1. ANTHROPIC ROUTE
+    if "claude" in model.lower():
+        response = claude_client.messages.create(
+            model=model,
+            max_tokens=1000,
+            system=system_prompt,
+            messages=[{"role": "user", "content": user_input}],
+            temperature=temperature
+        )
+        cost = _calculate_cost(model, response.usage.input_tokens, response.usage.output_tokens)
+        return response.content[0].text, cost
+
+    # 2. GOOGLE GEMINI ROUTE
+    elif "gemini" in model.lower():
+        response = google_client.models.generate_content(
+            model=model,
+            contents=system_prompt + "\n\n" + user_input
+        )
+        # Gemini usage metadata
+        input_toks = response.usage_metadata.prompt_token_count if response.usage_metadata else 0
+        output_toks = response.usage_metadata.candidates_token_count if response.usage_metadata else 0
+        return response.text, _calculate_cost(model, input_toks, output_toks)
+
+    # 3. GROQ (LLAMA 3) ROUTE
+    elif "llama" in model.lower():
+        response = groq_client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_input}
+            ],
+            temperature=temperature
+        )
+        cost = _calculate_cost(model, response.usage.prompt_tokens, response.usage.completion_tokens)
+        return response.choices[0].message.content, cost
+
+    # 4. OPENAI ROUTE (Default)
+    else:
+        response = openai_client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_input}
+            ],
+            temperature=temperature
+        )
+        cost = _calculate_cost(model, response.usage.prompt_tokens, response.usage.completion_tokens)
+        return response.choices[0].message.content, cost
+
+def generate_response(system_prompt: str, user_input: str, model: str = "gpt-4o-mini", temperature: float = 0.2) -> tuple[str, float]:
+    """
+    Primary orchestrator with built-in Fallback Routing for Failure Recovery.
+    """
+    max_retries = 2
     for attempt in range(max_retries):
         try:
-            # 1. GOOGLE GEMINI ROUTER
-            if "gemini" in model.lower():
-                full_prompt = f"System Instructions:\n{system_prompt}\n\nUser Input:\n{user_input}"
-                response = gemini_client.models.generate_content(
-                    model=model,
-                    contents=full_prompt,
-                    config={"temperature": temperature}
-                )
-                return response.text
-
-            # 2. ANTHROPIC CLAUDE ROUTER
-            elif "claude" in model.lower():
-                response = claude_client.messages.create(
-                    model=model,
-                    system=system_prompt,
-                    max_tokens=1000,
-                    temperature=temperature,
-                    messages=[{"role": "user", "content": user_input}]
-                )
-                return response.content[0].text
-
-            # 3. OPENAI ROUTER
-            else:
-                response = oai_client.chat.completions.create(
-                    model=model,
-                    messages=[
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": user_input}
-                    ],
-                    temperature=temperature
-                )
-                return response.choices[0].message.content
-
+            return _execute_api_call(system_prompt, user_input, model, temperature)
         except Exception as e:
-            error_msg = str(e)
+            print(f"  -> ⚠️ API Error on {model} (Attempt {attempt+1}): {e}")
+            time.sleep(2 ** attempt) # Exponential backoff
             
-            # Check if the error is a Rate Limit (429)
-            if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg or "rate_limit" in error_msg.lower():
-                wait_time = (attempt + 1) * 20  # Waits 20s, then 40s, then 60s
-                print(f"  -> ⏳ Rate limit hit on {model}. Waiting {wait_time}s to retry (Attempt {attempt + 1}/{max_retries})...")
-                time.sleep(wait_time)
-                continue # Try the loop again
-            else:
-                # If it's a different error (like a bad API key), fail immediately
-                print(f"🚨 Fatal API Error routing to {model}: {e}")
-                return ""
-                
-    print(f"❌ Failed to get response from {model} after {max_retries} attempts.")
-    return ""
+    print(f"  -> 🚨 {model} failed completely. Triggering Fallback Router to GPT-4o-mini...")
+    try:
+        # FALLBACK: If the assigned model is totally down, reroute to OpenAI to save the pipeline
+        return _execute_api_call(system_prompt, user_input, "gpt-4o-mini", temperature)
+    except Exception as e:
+        print("  -> 💥 Fallback also failed. Pipeline broken.")
+        raise e

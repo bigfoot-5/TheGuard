@@ -2,28 +2,52 @@ import json
 from scoring.format_compliance import score_format_compliance
 from scoring.semantic_similarity import score_semantic_similarity
 from scoring.llm_judge import score_factual_grounding, score_persuasiveness
+from scoring.confidence_calibration import score_confidence_calibration, score_intent_accuracy, score_edge_case_handling
 
-# Standardized Wrappers: Every metric takes (case_dict, generated_output)
-def wrap_format_compliance(case, output):
-    return score_format_compliance(output, case['expected_max_length'])
 
-def wrap_semantic_similarity(case, output):
-    return score_semantic_similarity(case['raw_deal_extraction'], output)
+# ==========================================
+# STANDARDIZED WRAPPERS
+# Every metric accepts (case, output, **kwargs) to safely absorb YAML variables like judge_model
+# ==========================================
 
-def wrap_factual_grounding(case, output):
-    return score_factual_grounding(case, output)
+def wrap_format_compliance(case, output, **kwargs):
+    # We recently updated this function to just accept the whole case dictionary!
+    return score_format_compliance(case, output)
 
-def wrap_intent_accuracy(case, output):
-    try:
-        output_json = json.loads(output.strip('` \n').replace('json\n', ''))
-        return 1.0 if output_json.get("intent") == case['expected_intent'] else 0.0
-    except:
-        return 0.0
+def wrap_semantic_similarity(case, output, **kwargs):
+    # Extracts the model from YAML, defaults to OpenAI if forgot to specify
+    emb_model = kwargs.get("embedding_model", "text-embedding-3-small")
+    return score_semantic_similarity(case['raw_deal_extraction'], output, embedding_model=emb_model)
 
-# The Dictionary that links the YAML string to the Python function
+def wrap_factual_grounding(case, output, **kwargs):
+    judge = kwargs.get("judge_model", "gpt-4o-mini")
+    return score_factual_grounding(case, output, judge_model=judge)
+
+def wrap_persuasiveness(case, output, **kwargs):
+    judge = kwargs.get("judge_model", "gpt-4o-mini")
+    return score_persuasiveness(output, judge_model=judge)
+
+def wrap_intent_accuracy(case, output, **kwargs):
+    # Now perfectly delegates to our robust parser in confidence_calibration.py
+    return score_intent_accuracy(case, output)
+
+def wrap_confidence_calibration(case, output, **kwargs):
+    # The brand new metric!
+    return score_confidence_calibration(case, output)
+
+def wrap_edge_case_handling(case, output, **kwargs):
+    return score_edge_case_handling(case, output)
+
+# ==========================================
+# CENTRAL REGISTRY
+# Links the YAML 'registry_key' to the Python functions above
+# ==========================================
 REGISTRY = {
     "format_compliance": wrap_format_compliance,
     "semantic_similarity": wrap_semantic_similarity,
     "factual_grounding": wrap_factual_grounding,
-    "intent_accuracy": wrap_intent_accuracy
+    "persuasiveness": wrap_persuasiveness,
+    "intent_accuracy": wrap_intent_accuracy,
+    "confidence_calibration": wrap_confidence_calibration,
+    "edge_case_handling": wrap_edge_case_handling
 }

@@ -42,7 +42,7 @@ jobs:
           # The script runs the 3 tasks, 5 scoring functions, McNemar/Bootstrap tests,           
           # and determines the GO/NO-GO/INCONCLUSIVE state.
           # It generates a 'regression_report.md' file summarizing the findings.          
-          python eval_pipeline/run_evals.py --base-ref origin/${{ github.base_ref }}                
+          python eval_pipeline/universal_run_evals.py --base-ref origin/${{ github.base_ref }}                
           
       - name: Post Evaluation Report to PR        
         if: always() # Ensure the report is posted even if the previous step failed (NO-GO)        

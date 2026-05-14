@@ -4,7 +4,7 @@ global:
 
 tasks:
   deal_copy:
-    model: "claude-haiku-4-5-20251001" # <--- ADD THIS LINE! This overrides the global default.
+    model: "claude-haiku-4-5-20251001" # Provider 1: Anthropic
     dataset: "eval_pipeline/data/deal_copy_cases.json"
     prompt_file: "eval_pipeline/prompts/system_assistant_389c7a3e.txt"
     input_template: "Write deal copy for: {raw_deal_extraction} at {merchant_name}. Target Channel: {target_channel}."
@@ -15,14 +15,36 @@ tasks:
       - name: "Semantic Similarity"
         registry_key: "semantic_similarity"
         type: "continuous"
+        embedding_model: "text-embedding-3-small"
+      - name: "Persuasiveness"
+        registry_key: "persuasiveness"
+        type: "continuous"
+        judge_model: "gpt-4o-mini" # Provider 2: OpenAI (LLM as a Judge)
 
   insurance_intent:
-    model: "claude-haiku-4-5-20251001" # <--- ADD THIS LINE!
+    model: "gemini-2.5-flash"  # Provider 3: Google
     dataset: "eval_pipeline/data/insurance_intent_cases.json"
     prompt_file: "eval_pipeline/prompts/system_insurance_classifier_b5a8b780.txt"
-    temperature: 0.1 # Override default temperature
+    temperature: 0.1 
     input_template: "Cart contents: {cart_contents}. Device: {user_device_type}. History: {historical_purchase_flags}."
     metrics:
       - name: "Intent Accuracy"
         registry_key: "intent_accuracy"
         type: "binary"
+      - name: "Confidence Calibration"
+        registry_key: "confidence_calibration"
+        type: "continuous"
+      - name: "Edge Case Safety"
+        registry_key: "edge_case_handling"
+        type: "binary"
+
+  credit_narrative:
+    model: "llama-3.1-8b-instant" # Provider 4: Groq (Open Source)
+    dataset: "eval_pipeline/data/credit_narrative_cases.json"
+    prompt_file: "eval_pipeline/prompts/system_underwriter_a93040d0.txt"
+    input_template: "Write a risk summary for merchant: {merchant_id}. MSME Status: {msme_registration_status}, Vintage: {business_vintage_years} years, Default Rate: {historical_default_rate_percentage}%, YoY Growth: {yoy_gmv_growth_percentage}%."
+    metrics:
+      - name: "Factual Grounding"
+        registry_key: "factual_grounding"
+        type: "continuous"
+        judge_model: "gpt-4o-mini"

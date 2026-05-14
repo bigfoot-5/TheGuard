@@ -1,76 +1,113 @@
-from typing import List, Dict
+import json
 
-def calculate_ece(predictions: List[Dict], num_bins: int = 10) -> float:
+def _parse_llm_json(raw_text: str) -> dict:
     """
-    Calculates the Expected Calibration Error (ECE).
-    Predictions must be a list of dicts: [{'is_correct': bool, 'confidence': float}]
+    Bulletproof JSON extractor. Hunts for the outermost brackets, 
+    completely ignoring Claude's conversational filler.
     """
-    if not predictions:
-        return 0.0
-
-    # 1. Initialize Bins (e.g., 10 bins: 0.0-0.1, 0.1-0.2... 0.9-1.0)
-    bins = {i: {'correct_count': 0, 'total_count': 0, 'sum_confidence': 0.0} for i in range(num_bins)}
-    
-    # 2. Assign predictions to bins
-    for pred in predictions:
-        conf = pred['confidence']
-        # Handle edge case where confidence is exactly 1.0 (put in the last bin)
-        bin_idx = min(int(conf * num_bins), num_bins - 1)
-        
-        bins[bin_idx]['total_count'] += 1
-        bins[bin_idx]['sum_confidence'] += conf
-        if pred['is_correct']:
-            bins[bin_idx]['correct_count'] += 1
-
-    # 3. Calculate ECE
-    n_total = len(predictions)
-    ece = 0.0
-    
-    for bin_data in bins.values():
-        bin_total = bin_data['total_count']
-        if bin_total == 0:
-            continue # Skip empty bins
+    try:
+        start_idx = raw_text.find('{')
+        end_idx = raw_text.rfind('}')
+        if start_idx != -1 and end_idx != -1:
+            json_str = raw_text[start_idx:end_idx+1]
+            return json.loads(json_str)
             
-        # Calculate Accuracy and average Confidence for this bin
-        bin_acc = bin_data['correct_count'] / bin_total
-        bin_conf = bin_data['sum_confidence'] / bin_total
+        print("  -> ⚠️ Warning: No JSON brackets found in the response.")
+        return {}
+    except Exception as e:
+        print(f"  -> ⚠️ Warning: Failed to parse LLM JSON output: {e}")
+        return {}
+
+# ==========================================
+# METRIC 1: INTENT ACCURACY (BINARY)
+# ==========================================
+def score_intent_accuracy(case: dict, generated_text: str) -> float:
+    """
+    Binary metric: Returns 1.0 if the predicted intent matches the expected intent exactly.
+    """
+    expected_intent = case.get("expected_intent", "").strip().lower()
+    
+    output_data = _parse_llm_json(generated_text)
+    predicted_intent = output_data.get("intent", "").strip().lower()
+    
+    # Strict Pass/Fail
+    if predicted_intent == expected_intent and expected_intent != "":
+        return 1.0
+    return 0.0
+
+# ==========================================
+# METRIC 2: CONFIDENCE CALIBRATION (CONTINUOUS)
+# ==========================================
+def score_confidence_calibration(case: dict, generated_text: str) -> float:
+    """
+    Continuous metric: Calculates Mean Absolute Calibration Error (MACE) for a single case.
+    Inverts the score so 1.0 is perfect calibration, and 0.0 is a confident hallucination.
+    """
+    expected_intent = case.get("expected_intent", "").strip().lower()
+    
+    output_data = _parse_llm_json(generated_text)
+    predicted_intent = output_data.get("intent", "").strip().lower()
+    
+    # Default to 0.0 if the LLM forgot to include a confidence score
+    confidence = float(output_data.get("confidence_score", 0.0))
+    
+    # 1. Did the model get it right?
+    is_correct = (predicted_intent == expected_intent)
+    
+    # 2. What SHOULD its confidence have been?
+    # If it is correct, it should be 100% (1.0) confident.
+    # If it is wrong, it should be 0% (0.0) confident.
+    ideal_confidence = 1.0 if is_correct else 0.0
+    
+    # 3. Calculate the Error (Distance from reality)
+    error = abs(ideal_confidence - confidence)
+    
+    # 4. Invert so Higher is Better (to work with your Dashboard trendlines)
+    # Perfect calibration = 1.0. Terrible overconfidence = 0.0.
+    return 1.0 - error
+
+def score_edge_case_handling(case: dict, generated_text: str) -> float:
+    """
+    Scores how safely the model handles ambiguous carts.
+    To pass an edge case, the model MUST either:
+    1. Output 'No Insurance Applicable' OR
+    2. Output a confidence score below 0.60 (admitting it is unsure).
+    """
+    is_edge_case = case.get("is_ambiguous_edge_case", False)
+    
+    # If it's a standard, easy case, this specific metric automatically passes.
+    if not is_edge_case:
+        return 1.0 
         
-        # Add to ECE using the formula: |Bm|/N * |acc(Bm) - conf(Bm)|
-        weight = bin_total / n_total
-        ece += weight * abs(bin_acc - bin_conf)
-        
-    return ece
+    output_data = _parse_llm_json(generated_text)
+    predicted_intent = output_data.get("intent", "").strip().lower()
+    confidence = float(output_data.get("confidence_score", 1.0))
+    
+    # Did the model handle the trap safely?
+    if predicted_intent == "no insurance applicable":
+        return 1.0 # Safest fallback!
+    elif confidence <= 0.60:
+        return 1.0 # It guessed, but correctly flagged its own uncertainty.
+    else:
+        return 0.0
 
 # ==========================================
 # QUICK TEST RUNNER
 # ==========================================
 if __name__ == "__main__":
-    print("🧪 Testing Confidence Calibration (ECE)...\n")
+    test_case = {"expected_intent": "Travel Cancellation"}
     
-    # Scenario 1: A perfectly calibrated model
-    # It is 90% confident when it's right, and 50% confident when it's basically guessing.
-    perfect_model = [
-        {'is_correct': True, 'confidence': 0.95},
-        {'is_correct': True, 'confidence': 0.90},
-        {'is_correct': True, 'confidence': 0.85},
-        {'is_correct': False, 'confidence': 0.40}, # Missed it, but knew it was unsure
-        {'is_correct': False, 'confidence': 0.45},
-    ]
+    # Scenario 1: Correct and highly confident
+    good_output = '{"intent": "Travel Cancellation", "confidence_score": 0.95}'
+    print(f"Accuracy: {score_intent_accuracy(test_case, good_output)}")     # Expected: 1.0
+    print(f"Calibration: {score_confidence_calibration(test_case, good_output)}\n") # Expected: ~0.95
     
-    ece_perfect = calculate_ece(perfect_model)
-    print(f"Perfectly Calibrated Model:")
-    print(f" -> ECE: {round(ece_perfect, 4)} (Closer to 0 is better)\n")
+    # Scenario 2: Wrong, but the model KNEW it was guessing (Good Calibration)
+    unsure_output = '{"intent": "Electronics Protection", "confidence_score": 0.40}'
+    print(f"Accuracy: {score_intent_accuracy(test_case, unsure_output)}")   # Expected: 0.0
+    print(f"Calibration: {score_confidence_calibration(test_case, unsure_output)}\n") # Expected: 0.60
     
-    # Scenario 2: A dangerously overconfident model (Hallucinating)
-    # It gets things wrong, but claims 99% confidence anyway.
-    dangerous_model = [
-        {'is_correct': True, 'confidence': 0.95},
-        {'is_correct': True, 'confidence': 0.90},
-        {'is_correct': True, 'confidence': 0.85},
-        {'is_correct': False, 'confidence': 0.99}, # WRONG, but 99% confident!
-        {'is_correct': False, 'confidence': 0.95}, # WRONG, but 95% confident!
-    ]
-    
-    ece_dangerous = calculate_ece(dangerous_model)
-    print(f"Dangerously Overconfident Model:")
-    print(f" -> ECE: {round(ece_dangerous, 4)} (High penalty for overconfidence!)")
+    # Scenario 3: Wrong, but 99% confident (Confident Hallucination / Terrible Calibration)
+    bad_output = '{"intent": "Electronics Protection", "confidence_score": 0.99}'
+    print(f"Accuracy: {score_intent_accuracy(test_case, bad_output)}")      # Expected: 0.0
+    print(f"Calibration: {score_confidence_calibration(test_case, bad_output)}\n") # Expected: 0.01 (Heavy Penalty!)

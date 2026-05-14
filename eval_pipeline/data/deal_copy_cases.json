@@ -1,5 +1,6 @@
 [
     {
+        "deal_id": "deal_001",
         "merchant_name": "Fashionista Boutique",
         "raw_deal_extraction": "Get 20% off on all new arrivals this season. Valid until end of month.",
         "category": "Apparel",
@@ -8,6 +9,7 @@
         "expected_max_length": 500
     },
     {
+        "deal_id": "deal_002",
         "merchant_name": "TechGadget Hub",
         "raw_deal_extraction": "Flash sale! Up to 50% off on smartphones for the next 24 hours only. Limited stock!",
         "category": "Electronics",
@@ -16,6 +18,7 @@
         "expected_max_length": 160
     },
     {
+        "deal_id": "deal_003",
         "merchant_name": "GreenEats Organic",
         "raw_deal_extraction": "Introducing our new line of organic vegan snacks. Buy any 2, get 1 free. Shop now!",
         "category": "Food & Beverage",
@@ -24,6 +27,7 @@
         "expected_max_length": 150
     },
     {
+        "deal_id": "deal_004",
         "merchant_name": "Adventure Trails",
         "raw_deal_extraction": "Book your next trekking trip to Ladakh and get a free guided tour. Valid for bookings made in July.",
         "category": "Travel",
@@ -32,6 +36,7 @@
         "expected_max_length": 55
     },
     {
+        "deal_id": "deal_005",
         "merchant_name": "HomeDecor Dreams",
         "raw_deal_extraction": "Flat 30% off on all furniture items. Plus, an extra 10% off for first-time buyers. Free delivery for orders over $500.",
         "category": "Home & Living",
@@ -40,6 +45,7 @@
         "expected_max_length": 500
     },
     {
+        "deal_id": "deal_006",
         "merchant_name": "FitLife Gym",
         "raw_deal_extraction": "Limited time offer! Get a 3-month gym membership for the price of 2. Enroll today!",
         "category": "Health & Fitness",
@@ -48,6 +54,7 @@
         "expected_max_length": 150
     },
     {
+        "deal_id": "deal_007",
         "merchant_name": "Bookworm's Paradise",
         "raw_deal_extraction": "Subscribe to our monthly book box and get your first box at 50% off. Discover new authors!",
         "category": "Books & Media",
@@ -56,6 +63,7 @@
         "expected_max_length": 160
     },
     {
+        "deal_id": "deal_008",
         "merchant_name": "Artisan Crafts",
         "raw_deal_extraction": "Shop handmade jewelry and unique gifts. Use code CRAFT15 for 15% off your entire order. Free shipping on all orders.",
         "category": "Arts & Crafts",
@@ -64,6 +72,7 @@
         "expected_max_length": 500
     },
     {
+        "deal_id": "deal_009",
         "merchant_name": "Gaming Zone",
         "raw_deal_extraction": "New game release! Pre-order now and get exclusive in-game items. Limited stock!",
         "category": "Gaming",
@@ -72,6 +81,7 @@
         "expected_max_length": 55
     },
     {
+        "deal_id": "deal_010",
         "merchant_name": "QuickBite Delivery",
         "raw_deal_extraction": "Order any meal tonight and get 25% off your next order. Offer valid for 24 hours only!",
         "category": "Food Delivery",
@@ -80,6 +90,7 @@
         "expected_max_length": 150
     },
     {
+        "deal_id": "deal_011",
         "merchant_name": "Fashionista Apparel",
         "raw_deal_extraction": "Get 30% off on all new arrivals. Limited period offer. Free shipping on orders above $50.",
         "category": "Apparel & Accessories",
@@ -88,6 +99,7 @@
         "expected_max_length": 500
     },
     {
+        "deal_id": "deal_012",
         "merchant_name": "TechGadgets India",
         "raw_deal_extraction": "Flash sale on smartphones! Up to 40% off for the next 24 hours only. Don't miss out!",
         "category": "Electronics",
@@ -96,6 +108,7 @@
         "expected_max_length": 160
     },
     {
+        "deal_id": "deal_013",
         "merchant_name": "Glovo Food Delivery",
         "raw_deal_extraction": "Order from your favorite restaurants and get 20% cashback on your next 3 orders. Min order value $15.",
         "category": "Food Delivery",
@@ -104,6 +117,7 @@
         "expected_max_length": 150
     },
     {
+        "deal_id": "deal_014",
         "merchant_name": "Bookworm Haven",
         "raw_deal_extraction": "Buy any 2 books, get 1 free! Explore new worlds.",
         "category": "Books & Media",
@@ -112,6 +126,7 @@
         "expected_max_length": 55
     },
     {
+        "deal_id": "deal_015",
         "merchant_name": "Home Decor Elite",
         "raw_deal_extraction": "Grand clearance sale! Up to 70% off on furniture and decor items. Plus, an extra 10% for loyalty members. Valid till stock lasts.",
         "category": "Home & Garden",
@@ -120,6 +135,7 @@
         "expected_max_length": 500
     },
     {
+        "deal_id": "deal_016",
         "merchant_name": "Fitness First",
         "raw_deal_extraction": "New year, new you! Get 3 months free on annual gym membership. Limited slots available.",
         "category": "Health & Fitness",
@@ -128,6 +144,7 @@
         "expected_max_length": 160
     },
     {
+        "deal_id": "deal_017",
         "merchant_name": "TravelBug Adventures",
         "raw_deal_extraction": "Last minute flight deals! Save up to 25% on domestic flights. Booking closes tonight!",
         "category": "Travel",
@@ -136,6 +153,7 @@
         "expected_max_length": 150
     },
     {
+        "deal_id": "deal_018",
         "merchant_name": "Artistic Supplies Co.",
         "raw_deal_extraction": "Exclusive artist bundles now 15% off. Unleash your creativity!",
         "category": "Art & Craft Supplies",
@@ -144,6 +162,7 @@
         "expected_max_length": 55
     },
     {
+        "deal_id": "deal_019",
         "merchant_name": "Gourmet Groceries",
         "raw_deal_extraction": "Weekend special: 15% off on organic produce, buy one get one free on selected bakery items, and free delivery for orders over $75. Valid Saturday & Sunday.",
         "category": "Groceries",
@@ -152,6 +171,7 @@
         "expected_max_length": 500
     },
     {
+        "deal_id": "deal_020",
         "merchant_name": "BeautyBliss Salon",
         "raw_deal_extraction": "Monsoon Pamper Package: 30% off on all spa services this month. Book now to relax!",
         "category": "Beauty & Personal Care",
@@ -160,6 +180,7 @@
         "expected_max_length": 160
     },
     {
+        "deal_id": "deal_021",
         "merchant_name": "Fashionista Boutique",
         "raw_deal_extraction": "Get 20% off on all new arrivals this weekend only. Plus, free shipping on orders over $50.",
         "category": "Apparel",
@@ -168,6 +189,7 @@
         "expected_max_length": 500
     },
     {
+        "deal_id": "deal_022",
         "merchant_name": "GadgetHub Electronics",
         "raw_deal_extraction": "Flash sale! Up to 50% off on smartphones for the next 24 hours. Limited stock!",
         "category": "Electronics",
@@ -176,6 +198,7 @@
         "expected_max_length": 160
     },
     {
+        "deal_id": "deal_023",
         "merchant_name": "DailyGrind Coffee",
         "raw_deal_extraction": "Buy one coffee, get one free! Valid today only at all locations.",
         "category": "Food & Beverage",
@@ -184,6 +207,7 @@
         "expected_max_length": 150
     },
     {
+        "deal_id": "deal_024",
         "merchant_name": "Bookworm Haven",
         "raw_deal_extraction": "Flat 30% off on bestsellers. Shop now!",
         "category": "Books",
@@ -192,6 +216,7 @@
         "expected_max_length": 55
     },
     {
+        "deal_id": "deal_025",
         "merchant_name": "LuxuryTravel Co.",
         "raw_deal_extraction": "Exclusive offer for platinum members: Earn double loyalty points on all international bookings made in September. Minimum spend $1000.",
         "category": "Travel",
@@ -200,6 +225,7 @@
         "expected_max_length": 500
     },
     {
+        "deal_id": "deal_026",
         "merchant_name": "HomeDecor Emporium",
         "raw_deal_extraction": "Diwali Special: Up to 40% off on home decor and furnishings. Valid till Oct 31.",
         "category": "Home & Living",
@@ -208,6 +234,7 @@
         "expected_max_length": 160
     },
     {
+        "deal_id": "deal_027",
         "merchant_name": "Tech Innovators",
         "raw_deal_extraction": "Introducing the new X-Pro drone! Pre-order now and get a free accessory kit.",
         "category": "Gadgets",
@@ -216,6 +243,7 @@
         "expected_max_length": 150
     },
     {
+        "deal_id": "deal_028",
         "merchant_name": "FitnessFirst Gym",
         "raw_deal_extraction": "Join our 7-day free trial. Limited slots!",
         "category": "Health & Fitness",
@@ -224,6 +252,7 @@
         "expected_max_length": 55
     },
     {
+        "deal_id": "deal_029",
         "merchant_name": "GourmetMealBox",
         "raw_deal_extraction": "Subscribe for 3 months and get your first month 50% off! Use code EATSMART. Cancel anytime.",
         "category": "Subscription Box - Food",
@@ -232,6 +261,7 @@
         "expected_max_length": 500
     },
     {
+        "deal_id": "deal_030",
         "merchant_name": "OrganicHarvest Farms",
         "raw_deal_extraction": "Fresh organic vegetables delivered to your door! Order by 5 PM for same-day delivery. Limited availability.",
         "category": "Groceries - Organic",
