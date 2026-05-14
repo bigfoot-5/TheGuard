@@ -1,12 +1,12 @@
 # 🛡️ GrabOn AI Labs: Production Output Guard (Eval-Driven CI/CD)
 
 **Candidate:** Karthik Talluri  
-**Assignment:** Assignment 03 - The Output Guard 
+**Assignment:** Assignment 03 - The Guard 
 
 ## (a) What I Built and Why I Chose This
 I built an automated, statistically rigorous Evaluation CI/CD Pipeline ("Output Guard") designed to prevent LLM regressions in production. It features a centralized Multi-LLM gateway, dynamic cost and latency tracking, LLM-as-a-Judge scoring, and a real-time observability dashboard. 
 
-**Why I chose Assignment 03:** Agentic workflows and prompt engineering are only as good as the evaluation harness that supports them. As AI models become increasingly non-deterministic, manual vibe-checks do not scale. I chose this assignment because I wanted to demonstrate that I view LLMs not just as APIs, but as production software systems that require deterministic testing, baseline anchoring, and automated statistical gates to deploy confidently.
+**Why I Chose this Assingnment:** Agentic workflows and structured prompt engineering are only as good as the evaluation harness that supports them. My experience as an AI/ML Researcher at Inspeq AI fundamentally shaped this perspective; designing production-grade LLM guardrails using frameworks like NVIDIA NeMo and TruLens taught me exactly how fragile non-deterministic models can be. I chose this assignment because manual vibe-checks simply do not scale. I wanted to demonstrate my belief that LLMs are not just APIs—they are production software systems that require deterministic testing, baseline anchoring, and automated statistical gates to deploy confidently.
 
 ---
 

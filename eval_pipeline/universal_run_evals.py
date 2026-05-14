@@ -96,7 +96,7 @@ def main():
         task_cost = 0.0
         
         with open(os.path.join(PROJECT_ROOT, task_config["dataset"]), "r") as f: 
-            cases = json.load(f)[:5]
+            cases = json.load(f)
             
         task_ids = [
             c.get("deal_id") or c.get("cart_id") or c.get("merchant_id") or f"#{i+1}" 
@@ -175,6 +175,23 @@ def main():
     if not baseline_raw_arrays:
         print("\n⚠️ COLD START: No previous baseline history found.")
         save_eval_results(current_averages, current_raw_arrays, provider=actual_providers, status="GO (BASELINE)", cost_data=task_costs_dict, latency=total_execution_time, task_providers=task_providers_dict)
+        
+        for row in raw_csv_data:
+            row["Regression_Detected"] = "False"
+            
+        csv_path = os.path.join(PROJECT_ROOT, "eval_report_raw_regression.csv")
+        fieldnames = ["Task", "Case_ID", "Model_Used", "Regression_Detected", "Total_Cost_USD", "Latency_Seconds"]
+        for row in raw_csv_data:
+            for key in row.keys():
+                if key not in fieldnames:
+                    fieldnames.append(key)
+                    
+        with open(csv_path, "w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(raw_csv_data)
+            
+        print(f"📄 Generated final raw eval report: {csv_path}")
         print("✅ GO: Pipeline initialized.")
         sys.exit(0)
         
@@ -218,7 +235,7 @@ def main():
                 if row["Case_ID"] in failed_cases_dict[metric_name]:
                     row["Regression_Detected"] = "True"
     
-    csv_path = os.path.join(PROJECT_ROOT, "eval_report_raw.csv")
+    csv_path = os.path.join(PROJECT_ROOT, "eval_report_raw_regression.csv")
     fieldnames = ["Task", "Case_ID", "Model_Used", "Regression_Detected", "Total_Cost_USD", "Latency_Seconds"]
     for row in raw_csv_data:
         for key in row.keys():
