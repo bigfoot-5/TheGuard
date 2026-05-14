@@ -85,9 +85,29 @@ if raw_data:
         overall_avg = sum(averages.values()) / len(averages)
         pass_rate_str = f"{overall_avg:.2%}"
         
+    # 2. Dynamic Total Cases (FIXED to sum across tasks)
     raw_arrays = latest_run.get("raw_arrays", {})
     if raw_arrays:
-        total_cases_str = str(max([len(arr) for arr in raw_arrays.values()] + [0]))
+        # Map metrics to tasks so we don't double-count metrics in the same task
+        metric_task_map = {
+            "format_compliance": "deal_copy",
+            "semantic_similarity": "deal_copy",
+            "persuasiveness": "deal_copy",
+            "intent_accuracy": "insurance_intent",
+            "confidence_calibration": "insurance_intent",
+            "edge_case_handling": "insurance_intent",
+            "factual_grounding": "credit_narrative"
+        }
+        
+        cases_per_task = {}
+        for metric_name, arr in raw_arrays.items():
+            parent_task = metric_task_map.get(metric_name)
+            if parent_task:
+                # Find the max cases for this specific task
+                cases_per_task[parent_task] = max(cases_per_task.get(parent_task, 0), len(arr))
+                
+        # Sum the cases across all distinct tasks!
+        total_cases_str = str(sum(cases_per_task.values()))
         
     raw_latency = latest_run.get('latency', 0.0)
     latency_str = f"{raw_latency:.1f}s"

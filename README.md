@@ -12,46 +12,7 @@ I built an automated, statistically rigorous Evaluation CI/CD Pipeline ("Output 
 
 ## (b) Architecture Diagram
 
-~~~mermaid
-graph TD
-    %% Define Node Styles
-    classDef core fill:#2C3E50,stroke:#34495E,stroke-width:2px,color:#FFF,font-weight:bold
-    classDef logic fill:#2980B9,stroke:#2980B9,stroke-width:2px,color:#FFF
-    classDef storage fill:#27AE60,stroke:#27AE60,stroke-width:2px,color:#FFF
-    classDef external fill:#E67E22,stroke:#E67E22,stroke-width:2px,color:#FFF
-    classDef ui fill:#8E44AD,stroke:#8E44AD,stroke-width:2px,color:#FFF
-
-    %% Git Trigger
-    A[GitHub Actions CI/CD]:::core -->|Triggers on PR| B(universal_run_evals.py):::logic
-    
-    %% Config and Data Inputs
-    Config[eval_config.yaml]:::storage --> B
-    Cases[Datasets: JSON Cases]:::storage --> B
-
-    %% The Generation & Gateway
-    B --> C[LLM Gateway / Router]:::core
-    C -->|Task 1: Claude 3.5| API1(Anthropic API):::external
-    C -->|Task 2: Gemini 1.5| API2(Google API):::external
-    C -->|Task 3: Llama 3| API3(Groq API):::external
-    C -.->|Fallback / Judge| API4(OpenAI API):::external
-    
-    %% Evaluation Scoring
-    C -->|Returns Text + Cost| D{Metrics Registry}:::logic
-    D --> E(Deterministic Metrics)
-    D --> F(LLM-as-a-Judge NLI)
-    
-    %% Stats & Output
-    D -->|Yields Smart Tuples| G{Statistical Engine}:::core
-    G -->|Bootstrap & McNemar| H[GO / NO-GO Decision]:::logic
-    
-    %% Telemetry 
-    H -->|Saves state, regressions, cost| I[(history.json)]:::storage
-    H -->|Row-level data| J[eval_report_raw.csv]:::storage
-    
-    %% Observability
-    I --> K[Streamlit Dashboard]:::ui
-    K --> L[Live Git Diff Tracker]:::ui
-~~~
+![alt text](image.png)
 
 ---
 
