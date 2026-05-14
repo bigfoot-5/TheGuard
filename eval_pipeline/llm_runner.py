@@ -8,13 +8,11 @@ import groq
 
 load_dotenv()
 
-# Initialize all 4 Providers
 openai_client = OpenAI()
 claude_client = anthropic.Anthropic()
 google_client = genai.Client()
 groq_client = groq.Groq()
 
-# Cost per 1M tokens (Input, Output) in USD
 PRICING = {
     "gpt-4o-mini": (0.15, 0.60),
     "claude-3-5-haiku-20241022": (1.00, 5.00),
@@ -29,7 +27,6 @@ def _calculate_cost(model: str, input_tokens: int, output_tokens: int) -> float:
 def _execute_api_call(system_prompt: str, user_input: str, model: str, temperature: float) -> tuple[str, float]:
     """Makes the raw API call and returns (response_text, cost)."""
     
-    # 1. ANTHROPIC ROUTE
     if "claude" in model.lower():
         response = claude_client.messages.create(
             model=model,
@@ -41,18 +38,15 @@ def _execute_api_call(system_prompt: str, user_input: str, model: str, temperatu
         cost = _calculate_cost(model, response.usage.input_tokens, response.usage.output_tokens)
         return response.content[0].text, cost
 
-    # 2. GOOGLE GEMINI ROUTE
     elif "gemini" in model.lower():
         response = google_client.models.generate_content(
             model=model,
             contents=system_prompt + "\n\n" + user_input
         )
-        # Gemini usage metadata
         input_toks = response.usage_metadata.prompt_token_count if response.usage_metadata else 0
         output_toks = response.usage_metadata.candidates_token_count if response.usage_metadata else 0
         return response.text, _calculate_cost(model, input_toks, output_toks)
 
-    # 3. GROQ (LLAMA 3) ROUTE
     elif "llama" in model.lower():
         response = groq_client.chat.completions.create(
             model=model,
@@ -65,7 +59,6 @@ def _execute_api_call(system_prompt: str, user_input: str, model: str, temperatu
         cost = _calculate_cost(model, response.usage.prompt_tokens, response.usage.completion_tokens)
         return response.choices[0].message.content, cost
 
-    # 4. OPENAI ROUTE (Default)
     else:
         response = openai_client.chat.completions.create(
             model=model,
@@ -80,7 +73,8 @@ def _execute_api_call(system_prompt: str, user_input: str, model: str, temperatu
 
 def generate_response(system_prompt: str, user_input: str, model: str = "gpt-4o-mini", temperature: float = 0.2) -> tuple[str, float]:
     """
-    Primary orchestrator with built-in Fallback Routing for Failure Recovery.
+    Sends the prompt to the selected LLM and returns the generated text along with its cost.
+    If the primary model fails, it automatically retries with a reliable default model.
     """
     max_retries = 2
     for attempt in range(max_retries):
@@ -88,11 +82,10 @@ def generate_response(system_prompt: str, user_input: str, model: str = "gpt-4o-
             return _execute_api_call(system_prompt, user_input, model, temperature)
         except Exception as e:
             print(f"  -> ⚠️ API Error on {model} (Attempt {attempt+1}): {e}")
-            time.sleep(2 ** attempt) # Exponential backoff
+            time.sleep(2 ** attempt)
             
     print(f"  -> 🚨 {model} failed completely. Triggering Fallback Router to GPT-4o-mini...")
     try:
-        # FALLBACK: If the assigned model is totally down, reroute to OpenAI to save the pipeline
         return _execute_api_call(system_prompt, user_input, "gpt-4o-mini", temperature)
     except Exception as e:
         print("  -> 💥 Fallback also failed. Pipeline broken.")

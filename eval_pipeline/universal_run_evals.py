@@ -7,15 +7,12 @@ from datetime import datetime
 import time
 import csv
 
-# Import LLM Runner, Stats Engine, and our new Registry
 from llm_runner import generate_response
 from stats.statistical_engine import calculate_paired_bootstrap, evaluate_decision_gate, calculate_mcnemar
 from metrics_registry import REGISTRY
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(BASE_DIR)
-
-# --- TELEMETRY & BASELINE STORAGE ---
 def get_current_commit():
     try:
         if "PR_COMMIT_SHA" in os.environ: return os.environ["PR_COMMIT_SHA"][:7]
@@ -51,7 +48,7 @@ def save_eval_results(averages_dict: dict, raw_arrays_dict: dict, provider: str,
     with open(history_path, "w") as f: json.dump(history, f, indent=4)
 
 def load_latest_baseline(current_raw_arrays: dict):
-    """Loads the most recent SUCCESSFUL baseline that matches the exact sample size."""
+    """Loads the most recent successful baseline that matches the exact sample size."""
     history_path = os.path.join(BASE_DIR, "data/history.json")
     if not os.path.exists(history_path): return None
     
@@ -74,12 +71,10 @@ def load_latest_baseline(current_raw_arrays: dict):
     except:
         return None
 
-# --- MAIN ORCHESTRATOR ---
 def main():
     print("🚀 Starting Config-Driven Evaluation Pipeline...")
     pipeline_start_time = time.time()
     
-    # 1. LOAD YAML CONFIG
     config_path = os.path.join(PROJECT_ROOT, "eval_config.yaml")
     with open(config_path, "r") as f:
         config = yaml.safe_load(f)
@@ -91,7 +86,6 @@ def main():
     metric_types = {} 
     metric_case_ids = {}
 
-    # 2. DYNAMIC EVALUATION LOOP
     total_pipeline_cost = 0.0
     task_costs_dict = {}
     raw_csv_data = []
@@ -101,7 +95,6 @@ def main():
         print(f"\n⏳ Evaluating Task: {task_name}...")
         task_cost = 0.0
         
-        # Load dataset & prompt (Ensure NO [:5] here!)
         with open(os.path.join(PROJECT_ROOT, task_config["dataset"]), "r") as f: 
             cases = json.load(f)
             
@@ -117,14 +110,12 @@ def main():
         temp = task_config.get("temperature", config["global"]["default_temperature"])
         task_providers_dict[task_name] = model
 
-        # Initialize arrays for the metrics tracked in this task
         for metric in task_config["metrics"]:
             reg_key = metric["registry_key"]
             current_raw_arrays[reg_key] = []
             metric_types[reg_key] = {"name": metric["name"], "type": metric["type"]}
             metric_case_ids[reg_key] = task_ids
 
-        # Run Inference and Score
         for case in cases:
             case_start_time = time.time() 
             
@@ -137,7 +128,6 @@ def main():
                 "Model_Used": model
             }
             
-            # 1. Catch the generation
             output, gen_cost = generate_response(system_prompt, user_input, model=model, temperature=temp)
             case_cost = gen_cost
             
@@ -145,10 +135,8 @@ def main():
                 reg_key = metric["registry_key"]
                 scoring_function = REGISTRY[reg_key]
                 
-                # 2. Execute the scoring function
                 result = scoring_function(case, output, **metric)
                 
-                # 3. Handle Smart Tuples
                 if isinstance(result, tuple):
                     score = result[0]
                     eval_cost = result[1]
@@ -166,7 +154,7 @@ def main():
             
             task_cost += case_cost
             if "gemini" in model.lower() or "llama" in model.lower():
-                time.sleep(2) # Rate limit protection
+                time.sleep(2)
 
         task_costs_dict[task_name] = task_cost
         total_pipeline_cost += task_cost
@@ -175,14 +163,12 @@ def main():
     task_costs_dict["Total"] = total_pipeline_cost
     print(f"\n💸 TOTAL PIPELINE GENERATION COST: ${total_pipeline_cost:.5f}")
     
-    # Calculate averages for telemetry
     for key, array in current_raw_arrays.items():
         current_averages[key] = sum(array) / len(array) if array else 0.0
         
     used_models = set([task.get("model", global_model) for task in config["tasks"].values()])
     actual_providers = " & ".join(used_models)
 
-    # 3. STATISTICAL ENGINE & CI/CD GATE
     baseline_raw_arrays = load_latest_baseline(current_raw_arrays)
     total_execution_time = time.time() - pipeline_start_time
     
@@ -225,9 +211,6 @@ def main():
         elif metric_decision == "INCONCLUSIVE" and final_decision != "NO-GO":
             final_decision = "INCONCLUSIVE"
 
-    # ==========================================
-    # EXPORT RAW CSV REPORT (ENHANCED WITH REGRESSIONS)
-    # ==========================================
     for row in raw_csv_data:
         row["Regression_Detected"] = "False"
         for metric_name in row.keys():
@@ -249,7 +232,6 @@ def main():
         
     print(f"📄 Generated final raw eval report: {csv_path}")
 
-    # 5. THE MASTER GO / NO-GO GATE
     print("\n=========================================")
     print(f"⏱️ Total Pipeline Execution Time: {total_execution_time:.1f}s")
     

@@ -6,13 +6,9 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from llm_runner import generate_response
 
-# ==========================================
-# HELPER: ROBUST JSON PARSER
-# ==========================================
 def _extract_json(raw_text: str) -> dict:
     """
-    Bulletproof JSON extractor. Hunts for the outermost brackets, 
-    completely ignoring any conversational filler from the LLM.
+    Extracts JSON from the text.
     """
     try:
         start_idx = raw_text.find('{')
@@ -20,19 +16,14 @@ def _extract_json(raw_text: str) -> dict:
         if start_idx != -1 and end_idx != -1:
             json_str = raw_text[start_idx:end_idx+1]
             return json.loads(json_str)
-        print("  -> ⚠️ Warning: No JSON brackets found in Judge response.")
         return {}
-    except Exception as e:
-        print(f"  -> ⚠️ Warning: Failed to parse Judge JSON: {e}")
+    except Exception:
         return {}
 
-# ==========================================
-# METRIC 1: FACTUAL GROUNDING (NLI)
-# ==========================================
 def score_factual_grounding(source_data: dict, generated_narrative: str, judge_model: str = "gpt-4o") -> tuple[float, float]:
     """
-    Evaluates if the narrative hallucinates facts not present in the source data.
-    Returns (score, cost)
+    Checks if the generated text invents facts not found in the original data.
+    Returns the percentage of true statements, and the cost of the check.
     """
     system_prompt = """
     You are an expert underwriter evaluation AI. Your job is Natural Language Inference (NLI).
@@ -58,10 +49,8 @@ def score_factual_grounding(source_data: dict, generated_narrative: str, judge_m
     
     user_prompt = f"Source Data: {json.dumps(source_data)}\nGenerated Narrative: {generated_narrative}"
 
-    # Send through the Centralized Gateway!
     raw_response, cost = generate_response(system_prompt, user_prompt, model=judge_model, temperature=0.0)
     
-    # Parse output using our universal extractor
     parsed_data = _extract_json(raw_response)
     evaluations = parsed_data.get("claims", [])
     
@@ -75,13 +64,10 @@ def score_factual_grounding(source_data: dict, generated_narrative: str, judge_m
     return final_score, cost
 
 
-# ==========================================
-# METRIC 2: PERSUASIVENESS QUALITY
-# ==========================================
 def score_persuasiveness(generated_copy: str, judge_model: str = "gpt-4o") -> tuple[float, float]:
     """
-    Evaluates marketing copy on Clarity, Urgency, and CTA Strength.
-    Returns (normalized_score, cost)
+    Scores how persuasive the marketing copy is.
+    Returns a score from 0 to 1, and the cost of the check.
     """
     system_prompt = """
     You are an expert Chief Marketing Officer evaluating promotional copy.
@@ -101,10 +87,8 @@ def score_persuasiveness(generated_copy: str, judge_model: str = "gpt-4o") -> tu
 
     user_prompt = f"Evaluate this copy: {generated_copy}"
 
-    # Send through the Centralized Gateway!
     raw_response, cost = generate_response(system_prompt, user_prompt, model=judge_model, temperature=0.2)
     
-    # Parse output
     result = _extract_json(raw_response)
     
     total_score = result.get("clarity", 0) + result.get("urgency", 0) + result.get("cta_strength", 0)

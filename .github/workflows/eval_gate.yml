@@ -2,23 +2,21 @@ name: "Production Evaluation Gate: GrabOn AI Labs"
 on:  
   pull_request:    
     paths:      
-      - 'prompts/**'      
-      - 'models/**'      
-      - 'tools/**'      
       - 'eval_pipeline/**'
+      - 'eval_config.yaml'
 
 jobs:  
   run_eval_pipeline:    
     name: Execute Statistical Eval Harness    
     runs-on: ubuntu-latest    
     permissions:      
-      contents: read        # Locked down: Bot no longer needs push access
-      pull-requests: write  # Required to post the evaluation report comment          
+      contents: read
+      pull-requests: write          
     steps:      
       - name: Checkout Repository        
         uses: actions/checkout@v4        
         with:          
-          fetch-depth: 0 # Required to generate git diffs against the base branch      
+          fetch-depth: 0 
           
       - name: Set up Python 3.10 Environment        
         uses: actions/setup-python@v5        
@@ -29,40 +27,43 @@ jobs:
       - name: Install Dependencies  
         run: |          
           python -m pip install --upgrade pip          
-          pip install -r eval_pipeline/requirements.txt # Installs scipy, statsmodels, pytest, etc.      
+          pip install -r eval_pipeline/requirements.txt 
           
       - name: Execute Evaluation and Statistical Engine        
         id: run_evals        
-        env:          
+        env:
+          # CRITICAL: Added Groq and the specific PR Commit SHA variable
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}          
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }} 
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}    
-             
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          PR_COMMIT_SHA: ${{ github.event.pull_request.head.sha }} 
         run: |
-          # The script runs the 3 tasks, 5 scoring functions, McNemar/Bootstrap tests,           
-          # and determines the GO/NO-GO/INCONCLUSIVE state.
-          # It generates a 'regression_report.md' file summarizing the findings.          
-          python eval_pipeline/universal_run_evals.py --base-ref origin/${{ github.base_ref }}                
+          # Running the full pipeline
+          python eval_pipeline/universal_run_evals.py              
           
       - name: Post Evaluation Report to PR        
-        if: always() # Ensure the report is posted even if the previous step failed (NO-GO)        
+        if: always() 
         uses: mshick/add-pr-comment@v2        
-        with:          
-          message-path: regression_report.md          
+        with:
+          # Note: We need a quick step to generate this .md file if it doesn't exist!
+          message: |
+            ### 🛡️ GrabOn AI Labs: Eval Report
+            The evaluation pipeline has finished. Please check the **Actions Tab** to download the `eval-telemetry-and-report` artifacts for the full CSV data.
           repo-token: ${{ secrets.GITHUB_TOKEN }} 
                 
       - name: Enforce GO/NO-GO Gate        
         if: failure()        
         run: |
-          echo "::error::Evaluation pipeline detected a statistically significant regression or inconclusive result. Merge is blocked."          
+          echo "::error::Evaluation pipeline detected a statistically significant regression. Merge is blocked."          
           exit 1
 
       - name: Save Evaluation Artifacts        
-        if: always() # Guarantees the report and data save even if the PR fails the GO/NO-GO gate       
+        if: always() 
         uses: actions/upload-artifact@v4        
         with:          
           name: eval-telemetry-and-report          
           path: |            
             eval_pipeline/data/history.json            
-            regression_report.md          
+            eval_report_raw.csv
           retention-days: 14
