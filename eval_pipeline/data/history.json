@@ -78,5 +78,93 @@
             "insurance_intent": "gemini-2.5-flash",
             "credit_narrative": "llama-3.1-8b-instant"
         }
+    },
+    {
+        "timestamp": "2026-05-14 19:56:35",
+        "task": "Full Config Suite",
+        "provider": "gemini-2.5-flash & claude-haiku-4-5-20251001 & llama-3.1-8b-instant",
+        "commit_hash": "e307418",
+        "status": "NO-GO",
+        "latency": 137.32471299171448,
+        "cost_data": {
+            "deal_copy": 0.00038504999999999995,
+            "insurance_intent": 0.00022559999999999998,
+            "credit_narrative": 0.0017334,
+            "Total": 0.00234405
+        },
+        "failed_cases": {
+            "Semantic Similarity": [
+                "deal_001",
+                "deal_002",
+                "deal_003",
+                "deal_004",
+                "deal_005"
+            ]
+        },
+        "averages": {
+            "format_compliance": 0.0,
+            "semantic_similarity": 0.68162,
+            "persuasiveness": 0.8666600000000001,
+            "intent_accuracy": 0.4,
+            "confidence_calibration": 0.39,
+            "edge_case_handling": 1.0,
+            "factual_grounding": 0.56264
+        },
+        "raw_arrays": {
+            "format_compliance": [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+            ],
+            "semantic_similarity": [
+                0.6154,
+                0.7864,
+                0.7061,
+                0.7562,
+                0.544
+            ],
+            "persuasiveness": [
+                0.8333,
+                0.9,
+                0.8333,
+                0.8667,
+                0.9
+            ],
+            "intent_accuracy": [
+                0.0,
+                0.0,
+                1.0,
+                1.0,
+                0.0
+            ],
+            "confidence_calibration": [
+                0.09999999999999998,
+                0.09999999999999998,
+                0.85,
+                0.85,
+                0.050000000000000044
+            ],
+            "edge_case_handling": [
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "factual_grounding": [
+                0.4444,
+                0.8,
+                0.7143,
+                0.4545,
+                0.4
+            ]
+        },
+        "task_providers": {
+            "deal_copy": "claude-haiku-4-5-20251001",
+            "insurance_intent": "gemini-2.5-flash",
+            "credit_narrative": "llama-3.1-8b-instant"
+        }
     }
 ]

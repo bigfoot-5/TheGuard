@@ -39,7 +39,7 @@ tasks:
         type: "binary"
 
   credit_narrative:
-    model: "llama-3.1-8b-instant" 
+    model: "llama-3.3-70b-versatile" 
     dataset: "eval_pipeline/data/credit_narrative_cases.json"
     prompt_file: "eval_pipeline/prompts/system_underwriter_a93040d0.txt"
     input_template: "Write a risk summary for merchant: {merchant_id}. MSME Status: {msme_registration_status}, Vintage: {business_vintage_years} years, Default Rate: {historical_default_rate_percentage}%, YoY Growth: {yoy_gmv_growth_percentage}%."
