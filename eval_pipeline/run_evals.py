@@ -6,10 +6,7 @@ from datetime import datetime
 import time as timer
 import subprocess
 
-# Import LLM Runner
 from llm_runner import generate_response
-
-# Import all 5 Scoring Metrics
 from scoring.format_compliance import score_format_compliance
 from scoring.semantic_similarity import score_semantic_similarity
 from scoring.llm_judge import score_persuasiveness, score_factual_grounding
@@ -18,10 +15,8 @@ from stats.statistical_engine import calculate_paired_bootstrap, evaluate_decisi
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# --- TELEMETRY & BASELINE STORAGE ---
 def get_current_commit():
     try:
-        # Grabs the short 7-character Git commit hash
         commit_hash = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('utf-8').strip()
         return commit_hash
     except Exception:
@@ -39,7 +34,6 @@ def save_eval_results(task_name: str, averages_dict: dict, raw_arrays_dict: dict
             except: history = []
     else: history = []
 
-    # We save BOTH averages (for the dashboard) and raw arrays (for the stats engine)
     new_entry = {
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "task": task_name, 
@@ -52,7 +46,9 @@ def save_eval_results(task_name: str, averages_dict: dict, raw_arrays_dict: dict
     with open(history_path, "w") as f: json.dump(history, f, indent=4)
 
 def load_latest_baseline():
-    """Loads the most recent raw arrays from history.json to use as the baseline."""
+    """
+    Loads the data from the last successful test run.
+    """
     history_path = os.path.join(BASE_DIR, "data/history.json")
     
     if not os.path.exists(history_path): 
@@ -62,19 +58,15 @@ def load_latest_baseline():
         with open(history_path, "r") as f:
             data = json.load(f)
             
-            # If the file is valid JSON but empty, treat it as no baseline
             if not data or len(data) == 0:
                 return None
                 
-            # Return ONLY the raw arrays from the very last successful run!
             return data[-1].get("raw_arrays")
             
     except json.JSONDecodeError:
-        # If the file is completely blank (0 bytes) or corrupted, catch the crash
         print("⚠️ WARNING: history.json is corrupted or completely blank.")
         return None
 
-# --- EVALUATORS ---
 def evaluate_deal_copy(model: str):
     print(f"\n[1/3] ⏳ Evaluating Deal Copy against {model}...")
     with open(os.path.join(BASE_DIR, "data/deal_copy_cases.json"), "r") as f: cases = json.load(f)[:5]
@@ -103,7 +95,6 @@ def evaluate_credit_narrative(model: str):
     except FileNotFoundError:
         prompt = "You are an underwriter. Summarize the merchant data factually. Do not invent numbers."
     for case in cases:
-        # Pass the whole 'case' dictionary
         user_input = f"Write a risk summary for merchant: {json.dumps(case)}"
         output = generate_response(prompt, user_input, model=model)
         grounding_scores.append(score_factual_grounding(case, output))
@@ -146,17 +137,14 @@ def evaluate_insurance_intent(model: str):
     
     return {"intent_accuracy": intent_scores, "ece": raw_ece}
 
-# --- MAIN ORCHESTRATOR ---
 def main():
     print("🚀 Starting GrabOn CI/CD Evaluation Pipeline...")
     test_model = "gpt-4o-mini"
     
-    # 1. RUN THE CANDIDATE MODEL
     candidate_deal = evaluate_deal_copy(test_model)
     # candidate_credit = evaluate_credit_narrative(test_model)
     candidate_insurance = evaluate_insurance_intent(test_model)
     
-    # 2. COMPILE CURRENT RUN DATA
     current_raw_arrays = {
         "semantic_similarity": candidate_deal["semantic_similarity"],
         # "persuasiveness": candidate_deal["persuasiveness"],
@@ -174,7 +162,6 @@ def main():
         "ece": candidate_insurance["ece"]
     }
 
-    # 3. LOAD BASELINE (The "Cold Start" Check)
     baseline_raw_arrays = load_latest_baseline()
     
     if not baseline_raw_arrays:
@@ -184,10 +171,8 @@ def main():
         print("✅ GO: Pipeline initialized. Safe for deployment.")
         sys.exit(0)
         
-    # 4. STATISTICAL COMPARISON ENGINE 
     print("\n📊 Executing Phase 5: Statistical Comparison Engine...")
     
-    # We map every metric, its data arrays, AND its statistical type
     metrics_to_test = {
         "Semantic Similarity": {"baseline": baseline_raw_arrays["semantic_similarity"], "candidate": current_raw_arrays["semantic_similarity"], "type": "continuous"},
         # "Persuasiveness": {"baseline": baseline_raw_arrays["persuasiveness"], "candidate": current_raw_arrays["persuasiveness"], "type": "continuous"},
@@ -202,7 +187,6 @@ def main():
     for metric_name, data in metrics_to_test.items():
         print(f"\nEvaluating: {metric_name} ({data['type']} metric)...")
         
-        # Route to the correct statistical test
         if data["type"] == "continuous":
             stats_result = calculate_paired_bootstrap(data["baseline"], data["candidate"])
             print(f"  -> 95% CI: [{stats_result['ci_lower']:+.4f}, {stats_result['ci_upper']:+.4f}]")
@@ -212,7 +196,6 @@ def main():
             print(f"  -> McNemar P-Value: {stats_result['p_value']:.4f}")
             print(f"  -> Improvements: {stats_result['improvements']} | Regressions: {stats_result['regressions']}")
         
-        # Pass the type into the decision gate so it knows how to read the result
         metric_decision = evaluate_decision_gate(stats_result, metric_type=data["type"])
         
         if metric_decision == "NO-GO":
@@ -221,7 +204,6 @@ def main():
         elif metric_decision == "INCONCLUSIVE" and final_decision != "NO-GO":
             final_decision = "INCONCLUSIVE"
 
-    # 5. THE MASTER GO / NO-GO GATE
     print("\n=========================================")
     if final_decision == "NO-GO":
         print(f"❌ CRITICAL NO-GO: PR Blocked.")
@@ -233,7 +215,6 @@ def main():
     else:
         print(f"✅ GO: All metrics show statistically significant improvement or stable performance.")
         print("💾 Saving new run as the updated production baseline...")
-        # Only save to history if it actually passed! We don't want a regression becoming the new baseline.
         save_eval_results("Full Suite", current_averages, current_raw_arrays, provider=test_model)
         print("🚀 Safe for deployment.")
         sys.exit(0)

@@ -5,9 +5,6 @@ import os
 import plotly.express as px
 import subprocess
 
-# ==========================================
-# ROBUST PATH RESOLUTION
-# ==========================================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(BASE_DIR)
 HISTORY_PATH = os.path.join(PROJECT_ROOT, "eval_pipeline", "data", "history.json")
@@ -15,9 +12,6 @@ HISTORY_PATH = os.path.join(PROJECT_ROOT, "eval_pipeline", "data", "history.json
 st.set_page_config(page_title="GrabOn AI Output Guard", layout="wide")
 st.title("🛡️ GrabOn AI Labs: Telemetry Dashboard")
 
-# ==========================================
-# SINGLE DATA LOADER
-# ==========================================
 raw_data = []
 if os.path.exists(HISTORY_PATH):
     with open(HISTORY_PATH, "r") as f:
@@ -26,7 +20,6 @@ if os.path.exists(HISTORY_PATH):
         except json.JSONDecodeError:
             pass
 
-# We only have ONE build_dataframe function now!
 def build_dataframe(data: list) -> pd.DataFrame:
     if not data: return pd.DataFrame()
     
@@ -46,23 +39,20 @@ def build_dataframe(data: list) -> pd.DataFrame:
         task_providers = entry.get("task_providers", {})
         averages = entry.get("averages", {})
         
-        # THE FIX: Process old runs, but SANITIZE the names!
         if not task_providers:
             flat_entry = {
                 "timestamp": entry.get("timestamp"),
                 "commit_hash": entry.get("commit_hash", "unknown"),
                 "status": entry.get("status", "GO (LEGACY)"),
-                "task": "Legacy Suite",       # Replaces "Full Config Suite"
-                "provider": "Legacy Models"   # Replaces the ugly "&" string
+                "task": "Legacy Suite",       
+                "provider": "Legacy Models"   
             }
-            # Attach the old metrics
             for metric_name, score in averages.items():
                 flat_entry[metric_name] = score
                 
             flattened_data.append(flat_entry)
             continue
             
-        # Unroll the new schema into clean rows
         for task_name, model_name in task_providers.items():
             flat_entry = {
                 "timestamp": entry.get("timestamp"),
@@ -82,9 +72,6 @@ def build_dataframe(data: list) -> pd.DataFrame:
 
 df = build_dataframe(raw_data)
 
-# ==========================================
-# DYNAMIC TOP LEVEL METRICS
-# ==========================================
 pass_rate_str = "0.00%"
 total_cases_str = "0"
 latency_str = "0.0s"
@@ -120,9 +107,6 @@ with col4:
 
 st.markdown("Real-time observability for Agentic LLM performance and regression tracking.")
 
-# ==========================================
-# LIVE GIT INTEGRATION
-# ==========================================
 def get_commit_diff(commit_hash):
     if commit_hash == "unknown": return "No commit hash available to fetch diff."
     try:
@@ -136,9 +120,6 @@ def get_commit_diff(commit_hash):
     except subprocess.CalledProcessError:
         return f"Could not retrieve Git diff for commit: {commit_hash}."
 
-# ==========================================
-# SIDEBAR FILTERS
-# ==========================================
 st.sidebar.header("Filter Analytics")
 
 if not df.empty:
@@ -154,9 +135,6 @@ else:
     st.sidebar.warning("No evaluation history found. Run the pipeline to generate baseline.")
     filtered_df = df
 
-# ==========================================
-# MAIN DASHBOARD CONTENT
-# ==========================================
 if not filtered_df.empty:
     metadata_cols = ["timestamp", "commit_hash", "status", "task", "provider"]
     available_metrics = [col for col in filtered_df.columns if col not in metadata_cols]
@@ -170,7 +148,6 @@ if not filtered_df.empty:
             else:
                 st.metric(metric.replace("_", " ").title(), f"{avg_val:.2%}")
 
-    # 🚨 LATEST RUN DIAGNOSTICS
     if raw_data:
         latest_run = raw_data[-1] 
         if "NO-GO" in latest_run.get("status", "") and latest_run.get("failed_cases"):
@@ -182,7 +159,6 @@ if not filtered_df.empty:
                         st.markdown(f"- **{metric_name}:** {', '.join(cases)}")
                 st.info("💡 Tip: Look up these specific Case IDs in your JSON datasets to see exactly where the LLM got confused.")
 
-    # PERFORMANCE TRENDS 
     st.subheader("📈 Quality Trends Over Time")
     production_df = filtered_df[~filtered_df['status'].str.contains("NO-GO")]
     
@@ -197,7 +173,6 @@ if not filtered_df.empty:
     else:
         st.info("No successful production deployments to plot yet.")
 
-    # HISTORICAL COMMIT LOG
     st.subheader("🔍 Regression Root Cause Analysis (Commit Log)")
     cols_to_show = ["timestamp", "status", "task", "provider", "commit_hash"] + available_metrics
     log_df = filtered_df[cols_to_show].sort_values(by="timestamp", ascending=False)
@@ -211,7 +186,6 @@ if not filtered_df.empty:
     
     st.dataframe(log_df.style.map(highlight_status), use_container_width=True, hide_index=True)
 
-    # LIVE PROMPT DIFF EXPLORER
     st.subheader("🕵️ Live Config & Prompt Diff Explorer")
     st.markdown("---")
     st.subheader("🔬 Deep-Dive: Latest Run Dataset Explorer")
@@ -222,29 +196,22 @@ if not filtered_df.empty:
     if os.path.exists(csv_path):
         raw_df = pd.read_csv(csv_path)
         
-        # Create a mini-layout for our CSV filters
         colA, colB = st.columns([1, 3])
         
         with colA:
-            # A quick toggle to only show the broken stuff!
             show_only_failures = st.checkbox("🚨 Show only Regressions", value=False)
             
-            # A dynamic filter for the specific task
             filter_task = st.selectbox("Filter Dataset", ["All Tasks"] + list(raw_df["Task"].unique()))
             
         with colB:
-            # Apply the filters
             display_df = raw_df.copy()
             if show_only_failures:
-                # Assuming 'Regression_Detected' is a boolean string in the CSV
                 display_df = display_df[display_df["Regression_Detected"].astype(str).str.lower() == "true"]
             if filter_task != "All Tasks":
                 display_df = display_df[display_df["Task"] == filter_task]
                 
-            # Render the beautiful, interactive table
             st.dataframe(display_df, use_container_width=True, hide_index=True)
             
-            # Add a quick download button so engineers can export the broken cases
             csv_export = display_df.to_csv(index=False).encode('utf-8')
             st.download_button(
                 label="📥 Download Filtered CSV",

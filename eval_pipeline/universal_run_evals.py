@@ -96,7 +96,7 @@ def main():
         task_cost = 0.0
         
         with open(os.path.join(PROJECT_ROOT, task_config["dataset"]), "r") as f: 
-            cases = json.load(f)
+            cases = json.load(f)[:5]
             
         task_ids = [
             c.get("deal_id") or c.get("cart_id") or c.get("merchant_id") or f"#{i+1}" 
