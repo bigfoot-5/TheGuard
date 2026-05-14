@@ -1,40 +1,29 @@
-import os
 import json
-from dotenv import load_dotenv
-from openai import OpenAI
-from pydantic import BaseModel, Field
+import os
+import sys
 
-# Load environment variables
-load_dotenv()
-client = OpenAI() # Automatically picks up OPENAI_API_KEY from environment
+# Dynamically import the centralized LLM runner
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from llm_runner import generate_response
 
-# ==========================================
-# PYDANTIC SCHEMAS FOR STRUCTURED LLM OUTPUT
-# ==========================================
-
-# Schemas for Factual Grounding (NLI)
-class ClaimEvaluation(BaseModel):
-    atomic_claim: str = Field(description="A single, independent factual claim extracted from the narrative.")
-    classification: str = Field(description="Must be one of: Entailment, Contradiction, Neutral")
-    reasoning: str = Field(description="Brief explanation of why this classification was chosen based on source data.")
-
-class GroundingResult(BaseModel):
-    claims: list[ClaimEvaluation]
-
-# Schema for Persuasiveness Quality
-class QualityScores(BaseModel):
-    clarity: int = Field(description="Score from 1 to 10")
-    urgency: int = Field(description="Score from 1 to 10")
-    cta_strength: int = Field(description="Score from 1 to 10")
-    feedback: str = Field(description="One sentence of constructive feedback.")
-
-# ==========================================
-# METRIC 1: FACTUAL GROUNDING (NLI)
-# ==========================================
-def score_factual_grounding(source_data: dict, generated_narrative: str) -> float:
+def _extract_json(raw_text: str) -> dict:
     """
-    Evaluates if the narrative hallucinates facts not present in the source data.
-    Score = N_entailed / N_total_claims
+    Extracts JSON from the text.
+    """
+    try:
+        start_idx = raw_text.find('{')
+        end_idx = raw_text.rfind('}')
+        if start_idx != -1 and end_idx != -1:
+            json_str = raw_text[start_idx:end_idx+1]
+            return json.loads(json_str)
+        return {}
+    except Exception:
+        return {}
+
+def score_factual_grounding(source_data: dict, generated_narrative: str, judge_model: str = "gpt-4o") -> tuple[float, float]:
+    """
+    Checks if the generated text invents facts not found in the original data.
+    Returns the percentage of true statements, and the cost of the check.
     """
     system_prompt = """
     You are an expert underwriter evaluation AI. Your job is Natural Language Inference (NLI).
@@ -45,42 +34,40 @@ def score_factual_grounding(source_data: dict, generated_narrative: str) -> floa
        - 'Entailment' (supported by source)
        - 'Contradiction' (conflicts with source)
        - 'Neutral' (not mentioned in source / hallucinated)
-    """
-    
-    user_prompt = f"""
-    Source Data: {json.dumps(source_data)}
-    Generated Narrative: {generated_narrative}
-    """
 
-    response = client.beta.chat.completions.parse(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt}
-        ],
-        response_format=GroundingResult,
-        temperature=0.0 # Strict, deterministic evaluation
-    )
+    Respond ONLY with valid JSON. Example format:
+    {
+      "claims": [
+        {
+          "atomic_claim": "The merchant has been operating for 5 years.",
+          "classification": "Entailment",
+          "reasoning": "Matches business_vintage_years perfectly."
+        }
+      ]
+    }
+    """
     
-    evaluations = response.choices[0].message.parsed.claims
+    user_prompt = f"Source Data: {json.dumps(source_data)}\nGenerated Narrative: {generated_narrative}"
+
+    raw_response, cost = generate_response(system_prompt, user_prompt, model=judge_model, temperature=0.0)
+    
+    parsed_data = _extract_json(raw_response)
+    evaluations = parsed_data.get("claims", [])
     
     if not evaluations:
-        return 0.0
+        return 0.0, cost
         
-    # Calculate Math: Score = Entailed / Total
     total_claims = len(evaluations)
-    entailed_claims = sum(1 for claim in evaluations if claim.classification == "Entailment")
+    entailed_claims = sum(1 for claim in evaluations if claim.get("classification") == "Entailment")
     
-    score = entailed_claims / total_claims
-    return round(score, 4)
+    final_score = round(entailed_claims / total_claims, 4) if total_claims > 0 else 0.0
+    return final_score, cost
 
-# ==========================================
-# METRIC 2: PERSUASIVENESS QUALITY
-# ==========================================
-def score_persuasiveness(generated_copy: str) -> float:
+
+def score_persuasiveness(generated_copy: str, judge_model: str = "gpt-4o") -> tuple[float, float]:
     """
-    Evaluates marketing copy on Clarity, Urgency, and CTA Strength (1-10 each).
-    Normalizes the sum to a 0.0 - 1.0 scale.
+    Scores how persuasive the marketing copy is.
+    Returns a score from 0 to 1, and the cost of the check.
     """
     system_prompt = """
     You are an expert Chief Marketing Officer evaluating promotional copy.
@@ -88,44 +75,23 @@ def score_persuasiveness(generated_copy: str) -> float:
     1. Clarity: Is the discount/offer immediately obvious?
     2. Urgency: Does it compel the user to act quickly without sounding spammy?
     3. CTA Strength: Is the Call-To-Action clear and actionable?
+
+    Respond ONLY with valid JSON. Example format:
+    {
+      "clarity": 8,
+      "urgency": 9,
+      "cta_strength": 7,
+      "feedback": "Great urgency, but CTA could be slightly more direct."
+    }
     """
 
-    response = client.beta.chat.completions.parse(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": f"Evaluate this copy: {generated_copy}"}
-        ],
-        response_format=QualityScores,
-        temperature=0.2
-    )
-    
-    result = response.choices[0].message.parsed
-    
-    # Calculate Math: Max possible score is 30 (10 + 10 + 10)
-    total_score = result.clarity + result.urgency + result.cta_strength
-    normalized_score = total_score / 30.0
-    
-    return round(normalized_score, 4)
+    user_prompt = f"Evaluate this copy: {generated_copy}"
 
-# ==========================================
-# QUICK TEST RUNNER
-# ==========================================
-if __name__ == "__main__":
-    print("🧪 Testing Factual Grounding (NLI)...")
-    source = {"business_vintage_years": 2.5, "yoy_gmv_growth_percentage": 14.5, "historical_default_rate_percentage": 0.0}
+    raw_response, cost = generate_response(system_prompt, user_prompt, model=judge_model, temperature=0.2)
     
-    # Good Narrative: Sticks to the facts
-    good_narrative = "The merchant has been operating for 2.5 years with no historical defaults and a 14.5% GMV growth."
-    print(f"Good Grounding Score: {score_factual_grounding(source, good_narrative)}") # Expected: 1.0
+    result = _extract_json(raw_response)
     
-    # Hallucinated Narrative: Makes up a 38% growth rate
-    bad_narrative = "The merchant has been operating for 2.5 years and shows an incredible 38% GMV growth."
-    print(f"Bad Grounding Score: {score_factual_grounding(source, bad_narrative)}") # Expected: ~0.5
+    total_score = result.get("clarity", 0) + result.get("urgency", 0) + result.get("cta_strength", 0)
+    normalized_score = round(total_score / 30.0, 4)
     
-    print("\n🧪 Testing Persuasiveness Quality...")
-    boring_copy = "We have laptops for sale. You can buy them if you want. Use code MAC50."
-    print(f"Boring Copy Score: {score_persuasiveness(boring_copy)}") # Expected: Low score (< 0.5)
-    
-    fire_copy = "FLASH SALE! 🚨 Get 50% off MacBooks today only! Stock is strictly limited. Use code MAC50 at checkout right now!"
-    print(f"Fire Copy Score: {score_persuasiveness(fire_copy)}") # Expected: High score (> 0.85)
+    return normalized_score, cost

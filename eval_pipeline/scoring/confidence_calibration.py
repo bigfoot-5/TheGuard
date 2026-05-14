@@ -1,76 +1,82 @@
-from typing import List, Dict
+import json
 
-def calculate_ece(predictions: List[Dict], num_bins: int = 10) -> float:
+def _parse_llm_json(raw_text: str) -> dict:
     """
-    Calculates the Expected Calibration Error (ECE).
-    Predictions must be a list of dicts: [{'is_correct': bool, 'confidence': float}]
+    Extracts JSON from the model output.
     """
-    if not predictions:
+    try:
+        start_idx = raw_text.find('{')
+        end_idx = raw_text.rfind('}')
+        if start_idx != -1 and end_idx != -1:
+            json_str = raw_text[start_idx:end_idx+1]
+            return json.loads(json_str)
+            
+        return {}
+    except Exception:
+        return {}
+
+def score_intent_accuracy(case: dict, generated_text: str) -> float:
+    """
+    Checks if the model's predicted intent matches the correct intent.
+    Returns 1.0 for a match, 0.0 otherwise.
+    """
+    expected_intent = case.get("expected_intent", "").strip().lower()
+    
+    output_data = _parse_llm_json(generated_text)
+    predicted_intent = output_data.get("intent", "").strip().lower()
+    
+    if predicted_intent == expected_intent and expected_intent != "":
+        return 1.0
+    return 0.0
+
+def score_confidence_calibration(case: dict, generated_text: str) -> float:
+    """
+    Evaluates how well the model's confidence matches its actual accuracy.
+    A score of 1.0 means perfect self-awareness; 0.0 means it confidently hallucinated.
+    """
+    expected_intent = case.get("expected_intent", "").strip().lower()
+    
+    output_data = _parse_llm_json(generated_text)
+    predicted_intent = output_data.get("intent", "").strip().lower()
+    
+    confidence = float(output_data.get("confidence_score", 0.0))
+    is_correct = (predicted_intent == expected_intent)
+    ideal_confidence = 1.0 if is_correct else 0.0
+    error = abs(ideal_confidence - confidence)
+    
+    return 1.0 - error
+
+def score_edge_case_handling(case: dict, generated_text: str) -> float:
+    """
+    Checks if the model safely handles unclear situations by either outputting 'No Insurance Applicable' or expressing low confidence.
+    """
+    is_edge_case = case.get("is_ambiguous_edge_case", False)
+    
+    if not is_edge_case:
+        return 1.0 
+        
+    output_data = _parse_llm_json(generated_text)
+    predicted_intent = output_data.get("intent", "").strip().lower()
+    confidence = float(output_data.get("confidence_score", 1.0))
+    
+    if predicted_intent == "no insurance applicable":
+        return 1.0
+    elif confidence <= 0.60:
+        return 1.0
+    else:
         return 0.0
 
-    # 1. Initialize Bins (e.g., 10 bins: 0.0-0.1, 0.1-0.2... 0.9-1.0)
-    bins = {i: {'correct_count': 0, 'total_count': 0, 'sum_confidence': 0.0} for i in range(num_bins)}
-    
-    # 2. Assign predictions to bins
-    for pred in predictions:
-        conf = pred['confidence']
-        # Handle edge case where confidence is exactly 1.0 (put in the last bin)
-        bin_idx = min(int(conf * num_bins), num_bins - 1)
-        
-        bins[bin_idx]['total_count'] += 1
-        bins[bin_idx]['sum_confidence'] += conf
-        if pred['is_correct']:
-            bins[bin_idx]['correct_count'] += 1
-
-    # 3. Calculate ECE
-    n_total = len(predictions)
-    ece = 0.0
-    
-    for bin_data in bins.values():
-        bin_total = bin_data['total_count']
-        if bin_total == 0:
-            continue # Skip empty bins
-            
-        # Calculate Accuracy and average Confidence for this bin
-        bin_acc = bin_data['correct_count'] / bin_total
-        bin_conf = bin_data['sum_confidence'] / bin_total
-        
-        # Add to ECE using the formula: |Bm|/N * |acc(Bm) - conf(Bm)|
-        weight = bin_total / n_total
-        ece += weight * abs(bin_acc - bin_conf)
-        
-    return ece
-
-# ==========================================
-# QUICK TEST RUNNER
-# ==========================================
 if __name__ == "__main__":
-    print("🧪 Testing Confidence Calibration (ECE)...\n")
+    test_case = {"expected_intent": "Travel Cancellation"}
     
-    # Scenario 1: A perfectly calibrated model
-    # It is 90% confident when it's right, and 50% confident when it's basically guessing.
-    perfect_model = [
-        {'is_correct': True, 'confidence': 0.95},
-        {'is_correct': True, 'confidence': 0.90},
-        {'is_correct': True, 'confidence': 0.85},
-        {'is_correct': False, 'confidence': 0.40}, # Missed it, but knew it was unsure
-        {'is_correct': False, 'confidence': 0.45},
-    ]
+    good_output = '{"intent": "Travel Cancellation", "confidence_score": 0.95}'
+    print(f"Accuracy: {score_intent_accuracy(test_case, good_output)}")
+    print(f"Calibration: {score_confidence_calibration(test_case, good_output)}\n")
     
-    ece_perfect = calculate_ece(perfect_model)
-    print(f"Perfectly Calibrated Model:")
-    print(f" -> ECE: {round(ece_perfect, 4)} (Closer to 0 is better)\n")
+    unsure_output = '{"intent": "Electronics Protection", "confidence_score": 0.40}'
+    print(f"Accuracy: {score_intent_accuracy(test_case, unsure_output)}")
+    print(f"Calibration: {score_confidence_calibration(test_case, unsure_output)}\n")
     
-    # Scenario 2: A dangerously overconfident model (Hallucinating)
-    # It gets things wrong, but claims 99% confidence anyway.
-    dangerous_model = [
-        {'is_correct': True, 'confidence': 0.95},
-        {'is_correct': True, 'confidence': 0.90},
-        {'is_correct': True, 'confidence': 0.85},
-        {'is_correct': False, 'confidence': 0.99}, # WRONG, but 99% confident!
-        {'is_correct': False, 'confidence': 0.95}, # WRONG, but 95% confident!
-    ]
-    
-    ece_dangerous = calculate_ece(dangerous_model)
-    print(f"Dangerously Overconfident Model:")
-    print(f" -> ECE: {round(ece_dangerous, 4)} (High penalty for overconfidence!)")
+    bad_output = '{"intent": "Electronics Protection", "confidence_score": 0.99}'
+    print(f"Accuracy: {score_intent_accuracy(test_case, bad_output)}")
+    print(f"Calibration: {score_confidence_calibration(test_case, bad_output)}\n")

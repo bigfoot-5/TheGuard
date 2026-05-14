@@ -1,6 +1,4 @@
 # Generating datasets
-
-google-genai
 pydantic
 python-dotenv
 tenacity
@@ -14,3 +12,7 @@ statsmodels
 streamlit
 plotly
 pandas
+PyYAML==6.0.1
+anthropic
+google-genai
+groq
