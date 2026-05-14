@@ -19,10 +19,10 @@ tasks:
       - name: "Persuasiveness"
         registry_key: "persuasiveness"
         type: "continuous"
-        judge_model: "gpt-4o-mini" # Provider 2: OpenAI (LLM as a Judge)
+        judge_model: "gpt-4o-mini" 
 
   insurance_intent:
-    model: "gemini-2.5-flash"  # Provider 3: Google
+    model: "gemini-2.5-flash" 
     dataset: "eval_pipeline/data/insurance_intent_cases.json"
     prompt_file: "eval_pipeline/prompts/system_insurance_classifier_b5a8b780.txt"
     temperature: 0.1 
@@ -39,7 +39,7 @@ tasks:
         type: "binary"
 
   credit_narrative:
-    model: "llama-3.1-8b-instant" # Provider 4: Groq (Open Source)
+    model: "llama-3.1-8b-instant" 
     dataset: "eval_pipeline/data/credit_narrative_cases.json"
     prompt_file: "eval_pipeline/prompts/system_underwriter_a93040d0.txt"
     input_template: "Write a risk summary for merchant: {merchant_id}. MSME Status: {msme_registration_status}, Vintage: {business_vintage_years} years, Default Rate: {historical_default_rate_percentage}%, YoY Growth: {yoy_gmv_growth_percentage}%."
