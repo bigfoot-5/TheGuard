@@ -63,8 +63,48 @@ streamlit run dashboard/app.py
 ~~~
 
 ---
+## (e) CI/CD Integration & Git Flow
+The "Output Guard" is architected to operate as a blocking gate in a collaborative Git environment using GitHub Actions.
 
-## (e) Eval Results (The Baseline)
+### 1. Initializing the Repository (First-Time Setup)
+If you are setting this project up from scratch, link your local environment to your GitHub repository:
+~~~bash
+git init
+git add .
+git commit -m "Initial commit: GrabOn Output Guard architecture"
+git remote add origin <your-repository-url>
+git branch -M main
+git push -u origin main
+~~~
+
+### 2. Configuring GitHub Secrets (API Keys)
+For the GitHub Action to run the evaluation pipeline securely in the cloud, you must store your API keys as repository secrets:
+1. Go to your repository on GitHub.
+2. Navigate to **Settings > Security > Secrets and variables > Actions**.
+3. Click the green **New repository secret** button.
+4. Add the following keys one by one with their respective values:
+   * `OPENAI_API_KEY`
+   * `ANTHROPIC_API_KEY`
+   * `GEMINI_API_KEY`
+   * `GROQ_API_KEY`
+
+### 3. Triggering the Guard (Pull Request Flow)
+The pipeline is designed to run automatically on every Pull Request. It scans for changes in `eval_config.yaml` or any file within the `eval_pipeline/` directory.
+~~~bash
+git checkout -b feature/new-prompt-iteration
+# [Perform Prompt Engineering or Model Swaps]
+git add .
+git commit -m "feat: updated credit narrative system prompt"
+git push origin feature/new-prompt-iteration
+~~~
+
+### 4. Statistical Gating
+Once the PR is opened, the statistical engine compares the new results against the "Gold Standard" baseline stored in `history.json`. 
+* **GO:** If improvements are statistically significant (p < 0.05) or performance is stable, the PR is cleared for merge.
+* **NO-GO:** If a regression is detected, the GitHub Action fails, the merge button is disabled, and the developer is directed to the **Streamlit Dashboard** to inspect the row-level failures.
+---
+
+## (f) Eval Results (The Baseline)
 Based on a full evaluation run of 90 total cases (30 per task):
 
 * **Overall Pass Rate:** 92.4%
@@ -79,7 +119,7 @@ Based on a full evaluation run of 90 total cases (30 per task):
 
 ---
 
-## (f) What Broke First (And How I Fixed It)
+## (g) What Broke First (And How I Fixed It)
 
 **The Bug:** As I expanded the pipeline to strictly track evaluation costs, I refactored the LLM Judges to return a tuple containing both the similarity score and the token cost. Immediately, my statistical engine crashed with: `TypeError: unsupported operand type(s) for +: 'int' and 'tuple'`. The pipeline was trying to aggregate the raw tuples into the scoring array instead of float values. 
 
@@ -98,7 +138,7 @@ else:
 
 ---
 
-## (g) What I Would Change with 2 More Weeks
+## (h) What I Would Change with 2 More Weeks
 
 1. **Asynchronous Execution (`asyncio`):** Currently, the inference loop is synchronous, which makes the 90-case run take ~45 seconds. With two more weeks, I would wrap `generate_response` in `asyncio.gather` with a semaphore token bucket. This would drop pipeline latency from 45 seconds to under 5 seconds, severely speeding up the developer feedback loop in CI/CD.
 2. **Shadow-Testing Open Source Judges:** GPT-4o is excellent for Factual Grounding, but it is too expensive to run over 10,000 commits. I would implement a shadow-testing harness to evaluate if a locally hosted `Llama-3-70B` or `Qwen-2.5` could achieve 95% alignment with GPT-4o's NLI judgments. If so, I could swap the Judge model and reduce CI/CD compute costs by over 80%.
