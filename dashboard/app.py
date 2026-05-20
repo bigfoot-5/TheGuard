@@ -25,50 +25,41 @@ def build_dataframe(data: list) -> pd.DataFrame:
     
     flattened_data = []
     
-    metric_task_map = {
-        "format_compliance": "deal_copy",
-        "semantic_similarity": "deal_copy",
-        "persuasiveness": "deal_copy",
-        "intent_accuracy": "insurance_intent",
-        "confidence_calibration": "insurance_intent",
-        "edge_case_handling": "insurance_intent",
-        "factual_grounding": "credit_narrative"
-    }
-    
     for entry in data:
-        task_providers = entry.get("task_providers", {})
         averages = entry.get("averages", {})
+        task_providers = entry.get("task_providers", {})
         
-        if not task_providers:
-            flat_entry = {
-                "timestamp": entry.get("timestamp"),
-                "commit_hash": entry.get("commit_hash", "unknown"),
-                "status": entry.get("status", "GO (LEGACY)"),
-                "task": "Legacy Suite",       
-                "provider": "Legacy Models"   
-            }
-            for metric_name, score in averages.items():
-                flat_entry[metric_name] = score
+        # If we have tasks, iterate through them
+        if task_providers:
+            for task_name, model_name in task_providers.items():
+                # Start with metadata
+                flat_entry = {
+                    "timestamp": entry.get("timestamp"),
+                    "commit_hash": entry.get("commit_hash", "unknown"),
+                    "status": entry.get("status"),
+                    "task": task_name,         
+                    "provider": model_name     
+                }
                 
-            flattened_data.append(flat_entry)
-            continue
-            
-        for task_name, model_name in task_providers.items():
-            flat_entry = {
-                "timestamp": entry.get("timestamp"),
-                "commit_hash": entry.get("commit_hash", "unknown"),
-                "status": entry.get("status"),
-                "task": task_name,         
-                "provider": model_name     
-            }
-            
-            for metric_name, score in averages.items():
-                if metric_task_map.get(metric_name) == task_name:
-                    flat_entry[metric_name] = score
-                    
+                # DYNAMIC ASSIGNMENT:
+                # Add all metrics from the entry. Do not filter by task.
+                # This ensures every metric is captured regardless of mapping.
+                flat_entry.update(averages)
+                
+                flattened_data.append(flat_entry)
+        else:
+            # Fallback for old/legacy data
+            flat_entry = {"timestamp": entry.get("timestamp"), "status": "Legacy", **averages}
             flattened_data.append(flat_entry)
             
-    return pd.DataFrame(flattened_data)
+    df = pd.DataFrame(flattened_data)
+    
+    # Optional: Fill NaNs with 0 for metrics so the charts don't break
+    # Only do this if you are sure you want 0 instead of empty space
+    metric_cols = [c for c in df.columns if c not in ["timestamp", "commit_hash", "status", "task", "provider"]]
+    df[metric_cols] = df[metric_cols].fillna(0.0)
+    
+    return df
 
 df = build_dataframe(raw_data)
 
@@ -112,8 +103,9 @@ if raw_data:
     raw_latency = latest_run.get('latency', 0.0)
     latency_str = f"{raw_latency:.1f}s"
     
-    real_cost = latest_run.get("cost_data", {}).get("Total", 0.0)
-    cost_str = f"${real_cost:.5f}"
+    real_cost = latest_run.get("cost_data", {})
+    real_cost_val = real_cost.get("Total") or sum(v for k, v in real_cost.items() if isinstance(v, (int, float)))
+    cost_str = f"${real_cost_val:.5f}"
 
 col1, col2, col3, col4 = st.columns(4)
 with col1:
