@@ -179,7 +179,7 @@ def main():
         for row in raw_csv_data:
             row["Regression_Detected"] = "False"
             
-        csv_path = os.path.join(PROJECT_ROOT, "eval_report_raw_regression.csv")
+        csv_path = os.path.join(PROJECT_ROOT, "eval_report_raw_custom.csv")
         fieldnames = ["Task", "Case_ID", "Model_Used", "Regression_Detected", "Total_Cost_USD", "Latency_Seconds"]
         for row in raw_csv_data:
             for key in row.keys():
@@ -235,7 +235,7 @@ def main():
                 if row["Case_ID"] in failed_cases_dict[metric_name]:
                     row["Regression_Detected"] = "True"
     
-    csv_path = os.path.join(PROJECT_ROOT, "eval_report_raw_regression.csv")
+    csv_path = os.path.join(PROJECT_ROOT, "eval_report_raw_custom.csv")
     fieldnames = ["Task", "Case_ID", "Model_Used", "Regression_Detected", "Total_Cost_USD", "Latency_Seconds"]
     for row in raw_csv_data:
         for key in row.keys():

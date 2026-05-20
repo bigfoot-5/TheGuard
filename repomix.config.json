@@ -1,0 +1,33 @@
+{
+    "output": {
+        "style": "markdown",
+        "filePath": "/Users/karthiktalluri/Desktop/Coding/Coding_markdown/TheGuard2024-01-01.md",
+        "removeComments": false,
+        "showLineNumbers": false,
+        "topFilesLength": 10
+    },
+    "include": [
+        ".github/workflows/eval_gate.yml",
+        "dashboard/app.py",
+        "eval_config.yaml",
+        "eval_pipeline/data/data_creation.py",
+        "eval_pipeline/llm_runner.py",
+        "eval_pipeline/metrics_registry.py",
+        "eval_pipeline/prompt_manager.py",
+        "eval_pipeline/prompts/metadata.json",
+        "eval_pipeline/prompts/system_assistant_389c7a3e.txt",
+        "eval_pipeline/prompts/system_assistant_c6bcbf50.txt",
+        "eval_pipeline/prompts/system_insurance_classifier_b5a8b780.txt",
+        "eval_pipeline/prompts/system_underwriter_a93040d0.txt",
+        "eval_pipeline/requirements.txt",
+        "eval_pipeline/run_evals.py",
+        "eval_pipeline/scoring/confidence_calibration.py",
+        "eval_pipeline/scoring/format_compliance.py",
+        "eval_pipeline/scoring/llm_judge.py",
+        "eval_pipeline/scoring/new_metric_test.py",
+        "eval_pipeline/scoring/semantic_similarity.py",
+        "eval_pipeline/stats/statistical_engine.py",
+        "eval_pipeline/universal_run_evals.py",
+        "README.md"
+    ]
+}

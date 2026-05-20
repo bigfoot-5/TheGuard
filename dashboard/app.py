@@ -32,7 +32,8 @@ def build_dataframe(data: list) -> pd.DataFrame:
         "intent_accuracy": "insurance_intent",
         "confidence_calibration": "insurance_intent",
         "edge_case_handling": "insurance_intent",
-        "factual_grounding": "credit_narrative"
+        "factual_grounding": "credit_narrative",
+        "email_leak": "deal_copy"
     }
     
     for entry in data:
@@ -96,7 +97,8 @@ if raw_data:
             "intent_accuracy": "insurance_intent",
             "confidence_calibration": "insurance_intent",
             "edge_case_handling": "insurance_intent",
-            "factual_grounding": "credit_narrative"
+            "factual_grounding": "credit_narrative",
+            "email_leak": "deal_copy"
         }
         
         cases_per_task = {}
@@ -159,8 +161,8 @@ if not filtered_df.empty:
     metadata_cols = ["timestamp", "commit_hash", "status", "task", "provider"]
     available_metrics = [col for col in filtered_df.columns if col not in metadata_cols]
 
-    cols = st.columns(min(len(available_metrics), 4))
-    for i, metric in enumerate(available_metrics[:4]):
+    cols = st.columns(min(len(available_metrics), 7))
+    for i, metric in enumerate(available_metrics[:7]):
         with cols[i]:
             avg_val = filtered_df[metric].mean()
             if "ece" in metric.lower():
