@@ -273,5 +273,60 @@
         "task_prompt_hashes": {
             "deal_copy": "f1545c3d"
         }
+    },
+    {
+        "timestamp": "2026-05-20 18:46:41",
+        "task": "Full Config Suite",
+        "provider": "gpt-4o-mini",
+        "commit_hash": "8f14496",
+        "status": "GO (STABLE)",
+        "latency": 72.67209720611572,
+        "cost_data": {
+            "deal_copy": 0.0016343999999999998
+        },
+        "failed_cases": {},
+        "averages": {
+            "format_compliance": 0.69
+        },
+        "raw_arrays": {
+            "format_compliance": [
+                0.0,
+                1.0,
+                1.0,
+                0.8,
+                0.5,
+                1.0,
+                0.5,
+                0.5,
+                0.5,
+                1.0,
+                0.0,
+                0.8,
+                1.0,
+                1.0,
+                0.5,
+                0.5,
+                1.0,
+                0.5,
+                0.8,
+                1.0,
+                0.8,
+                1.0,
+                1.0,
+                1.0,
+                0.5,
+                0.5,
+                1.0,
+                0.0,
+                0.5,
+                0.5
+            ]
+        },
+        "task_providers": {
+            "deal_copy": "gpt-4o-mini"
+        },
+        "task_prompt_hashes": {
+            "deal_copy": "d680f664"
+        }
     }
 ]
