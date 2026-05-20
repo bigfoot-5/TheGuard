@@ -51,5 +51,58 @@
         "task_providers": {
             "deal_copy": "gpt-4o-mini"
         }
+    },
+    {
+        "timestamp": "2026-05-20 11:20:46",
+        "task": "Full Config Suite",
+        "provider": "claude-haiku-4-5-20251001",
+        "commit_hash": "1e61ce0",
+        "status": "GO (STABLE)",
+        "latency": 78.54922199249268,
+        "cost_data": {
+            "deal_copy": 0.0,
+            "Total": 0.0
+        },
+        "failed_cases": {},
+        "averages": {
+            "format_compliance": 0.35666666666666663
+        },
+        "raw_arrays": {
+            "format_compliance": [
+                0.0,
+                0.0,
+                0.8,
+                0.0,
+                0.0,
+                1.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.8,
+                1.0,
+                1.0,
+                0.0,
+                0.8,
+                0.0,
+                0.5,
+                0.0,
+                0.0,
+                0.0,
+                0.8,
+                1.0,
+                0.0,
+                0.0,
+                1.0
+            ]
+        },
+        "task_providers": {
+            "deal_copy": "claude-haiku-4-5-20251001"
+        }
     }
 ]
