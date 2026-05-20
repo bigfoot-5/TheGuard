@@ -1,0 +1,55 @@
+[
+    {
+        "timestamp": "2026-05-20 11:12:44",
+        "task": "Full Config Suite",
+        "provider": "gpt-4o-mini",
+        "commit_hash": "2a17de5",
+        "status": "GO (BASELINE)",
+        "latency": 54.41720914840698,
+        "cost_data": {
+            "deal_copy": 0.0026642999999999997,
+            "Total": 0.0026642999999999997
+        },
+        "failed_cases": {},
+        "averages": {
+            "format_compliance": 0.48666666666666664
+        },
+        "raw_arrays": {
+            "format_compliance": [
+                0.5,
+                1.0,
+                0.8,
+                0.0,
+                0.5,
+                0.0,
+                0.5,
+                0.0,
+                0.0,
+                0.8,
+                0.5,
+                0.8,
+                0.0,
+                1.0,
+                0.5,
+                0.5,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.8,
+                1.0,
+                0.5,
+                1.0,
+                0.8,
+                0.0,
+                0.8,
+                0.8,
+                0.5,
+                0.0
+            ]
+        },
+        "task_providers": {
+            "deal_copy": "gpt-4o-mini"
+        }
+    }
+]

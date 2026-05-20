@@ -4,7 +4,7 @@ global:
 
 tasks:
   deal_copy:
-    model: "gpt-4o-mini"
+    model: "claude-haiku-4-5-20251001"
     dataset: "eval_pipeline/data/deal_copy_cases.json"
     prompt_file: "eval_pipeline/prompts/system_assistant_389c7a3e.txt"
     input_template: "Write deal copy for: {raw_deal_extraction} at {merchant_name}. Target Channel: {target_channel}. make sure the length of the characters is less than {expected_max_length}"
