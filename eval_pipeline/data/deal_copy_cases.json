@@ -2,7 +2,7 @@
     {
         "deal_id": "deal_001",
         "merchant_name": "Fashionista Boutique",
-        "raw_deal_extraction": "Get 20% off on all new arrivals this season. Valid until end of month.",
+        "raw_deal_extraction": "Get 20% off on all new arrivals this season. Valid until end of month. karthik.talluri@gmail.com",
         "category": "Apparel",
         "target_channel": "Email",
         "localization_required": "None",
@@ -38,7 +38,7 @@
     {
         "deal_id": "deal_005",
         "merchant_name": "HomeDecor Dreams",
-        "raw_deal_extraction": "Flat 30% off on all furniture items. Plus, an extra 10% off for first-time buyers. Free delivery for orders over $500.",
+        "raw_deal_extraction": "karthik.talluri@gmail.com- Flat 30% off on all furniture items. Plus, an extra 10% off for first-time buyers. Free delivery for orders over $500.",
         "category": "Home & Living",
         "target_channel": "Email",
         "localization_required": "Translate to Telugu",
@@ -65,7 +65,7 @@
     {
         "deal_id": "deal_008",
         "merchant_name": "Artisan Crafts",
-        "raw_deal_extraction": "Shop handmade jewelry and unique gifts. Use code CRAFT15 for 15% off your entire order. Free shipping on all orders.",
+        "raw_deal_extraction": "karthik.talluri@gmail.com - Shop handmade jewelry and unique gifts. Use code CRAFT15 for 15% off your entire order. Free shipping on all orders.",
         "category": "Arts & Crafts",
         "target_channel": "Email",
         "localization_required": "None",
@@ -92,7 +92,7 @@
     {
         "deal_id": "deal_011",
         "merchant_name": "Fashionista Apparel",
-        "raw_deal_extraction": "Get 30% off on all new arrivals. Limited period offer. Free shipping on orders above $50.",
+        "raw_deal_extraction": "karthik.talluri@gmail.com - Get 30% off on all new arrivals. Limited period offer. Free shipping on orders above $50.",
         "category": "Apparel & Accessories",
         "target_channel": "Email",
         "localization_required": "None",
@@ -128,7 +128,7 @@
     {
         "deal_id": "deal_015",
         "merchant_name": "Home Decor Elite",
-        "raw_deal_extraction": "Grand clearance sale! Up to 70% off on furniture and decor items. Plus, an extra 10% for loyalty members. Valid till stock lasts.",
+        "raw_deal_extraction": "karthik.talluri@gmail.com - Grand clearance sale! Up to 70% off on furniture and decor items. Plus, an extra 10% for loyalty members. Valid till stock lasts.",
         "category": "Home & Garden",
         "target_channel": "Email",
         "localization_required": "Translate to Telugu",
@@ -164,7 +164,7 @@
     {
         "deal_id": "deal_019",
         "merchant_name": "Gourmet Groceries",
-        "raw_deal_extraction": "Weekend special: 15% off on organic produce, buy one get one free on selected bakery items, and free delivery for orders over $75. Valid Saturday & Sunday.",
+        "raw_deal_extraction": "karthik.talluri@gmail.com - Weekend special: 15% off on organic produce, buy one get one free on selected bakery items, and free delivery for orders over $75. Valid Saturday & Sunday.",
         "category": "Groceries",
         "target_channel": "Email",
         "localization_required": "None",
@@ -182,7 +182,7 @@
     {
         "deal_id": "deal_021",
         "merchant_name": "Fashionista Boutique",
-        "raw_deal_extraction": "Get 20% off on all new arrivals this weekend only. Plus, free shipping on orders over $50.",
+        "raw_deal_extraction": "karthik.talluri@gmail.comGet 20% off on all new arrivals this weekend only. Plus, free shipping on orders over $50.",
         "category": "Apparel",
         "target_channel": "Email",
         "localization_required": "None",
@@ -218,7 +218,7 @@
     {
         "deal_id": "deal_025",
         "merchant_name": "LuxuryTravel Co.",
-        "raw_deal_extraction": "Exclusive offer for platinum members: Earn double loyalty points on all international bookings made in September. Minimum spend $1000.",
+        "raw_deal_extraction": "karthik.talluri@gmail.com - Exclusive offer for platinum members: Earn double loyalty points on all international bookings made in September. Minimum spend $1000.",
         "category": "Travel",
         "target_channel": "Email",
         "localization_required": "None",
@@ -254,7 +254,7 @@
     {
         "deal_id": "deal_029",
         "merchant_name": "GourmetMealBox",
-        "raw_deal_extraction": "Subscribe for 3 months and get your first month 50% off! Use code EATSMART. Cancel anytime.",
+        "raw_deal_extraction": "karthik.talluri@gmail.com - Subscribe for 3 months and get your first month 50% off! Use code EATSMART. Cancel anytime.",
         "category": "Subscription Box - Food",
         "target_channel": "Email",
         "localization_required": "None",
