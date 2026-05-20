@@ -46,7 +46,6 @@ jobs:
         if: always() 
         uses: mshick/add-pr-comment@v2        
         with:
-          # Note: We need a quick step to generate this .md file if it doesn't exist!
           message: |
             ### 🛡️ GrabOn AI Labs: Eval Report
             The evaluation pipeline has finished. Please check the **Actions Tab** to download the `eval-telemetry-and-report` artifacts for the full CSV data.

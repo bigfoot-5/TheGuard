@@ -184,9 +184,16 @@ def main():
             if m_name in failed_cases_dict and row["Case_ID"] in failed_cases_dict[m_name]: row["Regression_Detected"] = "True"
     
     csv_path = os.path.join(PROJECT_ROOT, "eval_report_raw_custom.csv")
+    fieldnames = ["Task", "Case_ID", "Model_Used", "Regression_Detected", "Total_Cost_USD", "Latency_Seconds", "Prompt_Hash"]
+    for row in raw_csv_data:
+        for key in row.keys():
+            if key not in fieldnames:
+                fieldnames.append(key)
+                
     with open(csv_path, "w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=["Task", "Case_ID", "Model_Used", "Regression_Detected", "Total_Cost_USD", "Latency_Seconds", "Prompt_Hash", "Raw_Output"] + [k for k in raw_csv_data[0].keys() if k not in ["Task", "Case_ID", "Model_Used", "Regression_Detected", "Total_Cost_USD", "Latency_Seconds", "Prompt_Hash"]])
-        writer.writeheader(); writer.writerows(raw_csv_data)
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(raw_csv_data)
 
     for h in active_prompt_hashes: update_prompt_status(h, final_decision)
     if final_decision == "NO-GO":

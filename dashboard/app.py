@@ -32,8 +32,7 @@ def build_dataframe(data: list) -> pd.DataFrame:
         "intent_accuracy": "insurance_intent",
         "confidence_calibration": "insurance_intent",
         "edge_case_handling": "insurance_intent",
-        "factual_grounding": "credit_narrative",
-        "email_leak": "deal_copy"
+        "factual_grounding": "credit_narrative"
     }
     
     for entry in data:
@@ -97,8 +96,7 @@ if raw_data:
             "intent_accuracy": "insurance_intent",
             "confidence_calibration": "insurance_intent",
             "edge_case_handling": "insurance_intent",
-            "factual_grounding": "credit_narrative",
-            "email_leak": "deal_copy"
+            "factual_grounding": "credit_narrative"
         }
         
         cases_per_task = {}
@@ -161,8 +159,8 @@ if not filtered_df.empty:
     metadata_cols = ["timestamp", "commit_hash", "status", "task", "provider"]
     available_metrics = [col for col in filtered_df.columns if col not in metadata_cols]
 
-    cols = st.columns(min(len(available_metrics), 7))
-    for i, metric in enumerate(available_metrics[:7]):
+    cols = st.columns(len(available_metrics))
+    for i, metric in enumerate(available_metrics):
         with cols[i]:
             latest_sorted_df = filtered_df.sort_values(by="timestamp", ascending=False)
             current_val = latest_sorted_df[metric].iloc[0]

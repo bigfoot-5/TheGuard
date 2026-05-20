@@ -19,9 +19,39 @@
         },
         "eval_status": "PENDING"
     },
+    "d680f664": {
+        "prompt_name": "auto_deal_copy",
+        "timestamp": "2026-05-20T15:33:25.737742",
+        "author": "CI_CD_Runner",
+        "model_config": {
+            "model": "gpt-4o-mini",
+            "temperature": 0.2
+        },
+        "eval_status": "GO"
+    },
     "f1545c3d": {
         "prompt_name": "auto_deal_copy",
-        "timestamp": "2026-05-20T15:14:22.344286",
+        "timestamp": "2026-05-20T15:36:07.263161",
+        "author": "CI_CD_Runner",
+        "model_config": {
+            "model": "gpt-4o-mini",
+            "temperature": 0.2
+        },
+        "eval_status": "GO"
+    },
+    "c14eca62": {
+        "prompt_name": "auto_insurance_intent",
+        "timestamp": "2026-05-20T16:04:08.915217",
+        "author": "CI_CD_Runner",
+        "model_config": {
+            "model": "gpt-4o-mini",
+            "temperature": 0.1
+        },
+        "eval_status": "GO"
+    },
+    "38bec169": {
+        "prompt_name": "auto_credit_narrative",
+        "timestamp": "2026-05-20T16:04:37.857493",
         "author": "CI_CD_Runner",
         "model_config": {
             "model": "gpt-4o-mini",
