@@ -27,9 +27,12 @@ def save_prompt_version(prompt_name: str, prompt_content: str, author: str, mode
     with open(METADATA_FILE, "r") as f:
         metadata = json.load(f)
         
-    if prompt_hash in metadata and metadata[prompt_hash].get("eval_status") == "GO":
-        print(f"⚠️ Prompt version {prompt_hash} is already locked and deployed. No changes made.")
-        return prompt_hash
+    if prompt_hash in metadata:
+        current_status = metadata[prompt_hash].get("eval_status", "")
+        
+        if current_status.startswith("GO"):
+            print(f"⚠️ Prompt version {prompt_hash} is already locked ({current_status}). No changes made.")
+            return prompt_hash
         
     metadata[prompt_hash] = {
         "prompt_name": prompt_name,
@@ -46,7 +49,7 @@ def save_prompt_version(prompt_name: str, prompt_content: str, author: str, mode
     with open(prompt_file_path, "w") as f:
         f.write(prompt_content)
         
-    print(f"✅ Saved new prompt version: {prompt_hash}")
+    print(f"Saved new prompt version: {prompt_hash}")
     return prompt_hash
 
 def generate_prompt_diff(baseline_content: str, candidate_content: str) -> str:
@@ -61,3 +64,21 @@ def generate_prompt_diff(baseline_content: str, candidate_content: str) -> str:
         lineterm=''
     )
     return '\n'.join(diff)
+
+def update_prompt_status(prompt_hash: str, status: str):
+    """
+    Updates the evaluation status of a prompt version in metadata.json.
+    """
+    if not os.path.exists(METADATA_FILE):
+        return
+        
+    with open(METADATA_FILE, "r") as f:
+        metadata = json.load(f)
+        
+    if prompt_hash in metadata:
+        clean_status = "GO" if status.startswith("GO") else "NO-GO"
+        metadata[prompt_hash]["eval_status"] = clean_status
+        
+        with open(METADATA_FILE, "w") as f:
+            json.dump(metadata, f, indent=4)
+        print(f"🔄 Artifact Registry: Updated prompt {prompt_hash} status to {clean_status}")

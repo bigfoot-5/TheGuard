@@ -21,26 +21,17 @@ def score_format_compliance(case: dict, generated_text: str) -> float:
     else:
         return 0.0
 
-# if __name__ == "__main__":
-#     mock_case = {"expected_max_length": 160}
-    
-#     perfect_copy = "Flash Sale! Get 50% off all electronics at GrabOn this weekend only. Use code FLASH50 at checkout. Hurry, offer ends Sunday at midnight!"
-#     print(f"Perfect (<160): {score_format_compliance(mock_case, perfect_copy)}")
-    
-#     slight_over = "Flash Sale! Get 50% off all electronics at GrabOn this weekend only. Use code FLASH50 at checkout. Hurry, offer ends Sunday at midnight! Don't miss out on this deal."
-#     print(f"Slightly Over (174): {score_format_compliance(mock_case, slight_over)}")
-    
-#     moderate_over = "Flash Sale! Get 50% off all electronics at GrabOn this weekend only. Use code FLASH50 at checkout. Hurry, offer ends Sunday at midnight! We have smartphones, laptops, and headphones on clearance."
-#     print(f"Moderately Over (198): {score_format_compliance(mock_case, moderate_over)}")
-    
-#     fail_copy = perfect_copy + " " + perfect_copy
-#     print(f"Total Failure (>200): {score_format_compliance(mock_case, fail_copy)}")
-
-def score_email_leak(generated_text: str) -> float:
-    """Returns 0.0 if an '@' symbol is detected (fail), 1.0 if clean (pass)."""
-    if "@" in generated_text:
-        return 0.0
-    return 1.0
-
 if __name__ == "__main__":
-    print(score_email_leak("Hello, my name is John Doe and my email is karthik.talluri@gmail.com"))    
+    mock_case = {"expected_max_length": 160}
+    
+    perfect_copy = "Flash Sale! Get 50% off all electronics at GrabOn this weekend only. Use code FLASH50 at checkout. Hurry, offer ends Sunday at midnight!"
+    print(f"Perfect (<160): {score_format_compliance(mock_case, perfect_copy)}")
+    
+    slight_over = "Flash Sale! Get 50% off all electronics at GrabOn this weekend only. Use code FLASH50 at checkout. Hurry, offer ends Sunday at midnight! Don't miss out on this deal."
+    print(f"Slightly Over (174): {score_format_compliance(mock_case, slight_over)}")
+    
+    moderate_over = "Flash Sale! Get 50% off all electronics at GrabOn this weekend only. Use code FLASH50 at checkout. Hurry, offer ends Sunday at midnight! We have smartphones, laptops, and headphones on clearance."
+    print(f"Moderately Over (198): {score_format_compliance(mock_case, moderate_over)}")
+    
+    fail_copy = perfect_copy + " " + perfect_copy
+    print(f"Total Failure (>200): {score_format_compliance(mock_case, fail_copy)}")

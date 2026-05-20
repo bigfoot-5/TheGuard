@@ -4,17 +4,14 @@ global:
 
 tasks:
   deal_copy:
-    model: "claude-haiku-4-5-20251001"
+    model: "gpt-4o-mini"
     dataset: "eval_pipeline/data/deal_copy_cases.json"
     prompt_file: "eval_pipeline/prompts/system_assistant_389c7a3e.txt"
-    input_template: "Write deal copy for: {raw_deal_extraction} at {merchant_name}. Target Channel: {target_channel}"
+    input_template: "Write deal copy for: {raw_deal_extraction} at {merchant_name}. Target Channel: {target_channel}, character limit is {expected_max_length}"
     metrics:
       - name: "Format Compliance"
         registry_key: "format_compliance"
         type: "binary"
-      # - name: "Email Leak"
-      #   registry_key: "email_leak"
-      #   type: "binary"
       # - name: "Semantic Similarity"
       #   registry_key: "semantic_similarity"
       #   type: "continuous"

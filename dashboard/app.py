@@ -164,11 +164,12 @@ if not filtered_df.empty:
     cols = st.columns(min(len(available_metrics), 7))
     for i, metric in enumerate(available_metrics[:7]):
         with cols[i]:
-            avg_val = filtered_df[metric].mean()
+            latest_sorted_df = filtered_df.sort_values(by="timestamp", ascending=False)
+            current_val = latest_sorted_df[metric].iloc[0]
             if "ece" in metric.lower():
-                st.metric(metric.replace("_", " ").title(), f"{avg_val:.4f}", delta_color="inverse")
+                st.metric(metric.replace("_", " ").title(), f"{current_val:.4f}", delta_color="inverse")
             else:
-                st.metric(metric.replace("_", " ").title(), f"{avg_val:.2%}")
+                st.metric(metric.replace("_", " ").title(), f"{current_val:.2%}")
 
     if raw_data:
         latest_run = raw_data[-1] 

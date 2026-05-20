@@ -18,5 +18,15 @@
             "temperature": 0.2
         },
         "eval_status": "PENDING"
+    },
+    "f1545c3d": {
+        "prompt_name": "auto_deal_copy",
+        "timestamp": "2026-05-20T15:14:22.344286",
+        "author": "CI_CD_Runner",
+        "model_config": {
+            "model": "gpt-4o-mini",
+            "temperature": 0.2
+        },
+        "eval_status": "GO"
     }
 }
