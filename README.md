@@ -1,15 +1,3 @@
-# 🛡️ GrabOn AI Labs: Production Output Guard (Eval-Driven CI/CD)
-
-**Candidate:** Karthik Talluri  
-**Assignment:** Assignment 03 - The Guard 
-
-## (a) What I Built and Why I Chose This
-I built an automated, statistically rigorous Evaluation CI/CD Pipeline ("Output Guard") designed to prevent LLM regressions in production. It features a centralized Multi-LLM gateway, dynamic cost and latency tracking, LLM-as-a-Judge scoring, and a real-time observability dashboard. 
-
-**Why I Chose this Assingnment:** Agentic workflows and structured prompt engineering are only as good as the evaluation harness that supports them. My experience as an AI/ML Researcher at Inspeq AI fundamentally shaped this perspective; designing production-grade LLM guardrails using frameworks like NVIDIA NeMo and TruLens taught me exactly how fragile non-deterministic models can be. I chose this assignment because manual vibe-checks simply do not scale. I wanted to demonstrate my belief that LLMs are not just APIs—they are production software systems that require deterministic testing, baseline anchoring, and automated statistical gates to deploy confidently.
-
----
-
 ## (b) Architecture Diagram
 
 ![alt text](image.png)
@@ -119,27 +107,3 @@ Based on a full evaluation run of 90 total cases (30 per task):
 
 ---
 
-## (g) What Broke First (And How I Fixed It)
-
-**The Bug:** As I expanded the pipeline to strictly track evaluation costs, I refactored the LLM Judges to return a tuple containing both the similarity score and the token cost. Immediately, my statistical engine crashed with: `TypeError: unsupported operand type(s) for +: 'int' and 'tuple'`. The pipeline was trying to aggregate the raw tuples into the scoring array instead of float values. 
-
-**The Fix & The "Aha" Moment:** I realized I had created a data-flow mismatch. I built a "Smart Tuple Router" inside the main inference loop:
-~~~python
-if isinstance(result, tuple):
-    score = result[0]
-    eval_cost = result[1]
-else:
-    score = result
-    eval_cost = 0.0
-~~~
-**Why this mattered:** This bug forced me to decouple the *evaluation logic* from the *business logic*. It allowed me to calculate fractional token costs for the LLM judges on the fly, without breaking the core statistical assumptions needed for my Paired Bootstrap tests. 
-
-*Second Bug Note:* I also hit 404 errors with Gemini's `text-embedding-004`. Rather than halting the pipeline, I updated the Gateway to print a warning and safely return a zero-vector so the GitHub Action wouldn't fatally crash due to a third-party API outage.
-
----
-
-## (h) What I Would Change with 2 More Weeks
-
-1. **Asynchronous Execution (`asyncio`):** Currently, the inference loop is synchronous, which makes the 90-case run take ~45 seconds. With two more weeks, I would wrap `generate_response` in `asyncio.gather` with a semaphore token bucket. This would drop pipeline latency from 45 seconds to under 5 seconds, severely speeding up the developer feedback loop in CI/CD.
-2. **Shadow-Testing Open Source Judges:** GPT-4o is excellent for Factual Grounding, but it is too expensive to run over 10,000 commits. I would implement a shadow-testing harness to evaluate if a locally hosted `Llama-3-70B` or `Qwen-2.5` could achieve 95% alignment with GPT-4o's NLI judgments. If so, I could swap the Judge model and reduce CI/CD compute costs by over 80%.
-3. **Dataset Curation UI:** I would add a tab to the Streamlit dashboard allowing engineers to click "Add to Golden Dataset" when they encounter interesting edge cases in production, seamlessly expanding the JSON test cases without writing code.
