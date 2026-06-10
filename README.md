@@ -1,10 +1,10 @@
-## (b) Architecture Diagram
+## Architecture Diagram
 
 ![alt text](image.png)
 
 ---
 
-## (c) Per-Module Design Decisions & Tradeoffs
+## Per-Module Design Decisions & Tradeoffs
 
 1. **Centralized LLM Gateway (`llm_runner.py`)**
    * **Decision:** Instead of having each evaluation metric manage its own API calls, I routed *all* traffic (Generators and Judges) through a single Gateway.
@@ -18,7 +18,7 @@
 
 ---
 
-## (d) How to Run
+## How to Run
 
 ### 1. Environment Setup
 ~~~bash
@@ -51,7 +51,7 @@ streamlit run dashboard/app.py
 ~~~
 
 ---
-## (e) CI/CD Integration & Git Flow
+## CI/CD Integration & Git Flow
 The "Output Guard" is architected to operate as a blocking gate in a collaborative Git environment using GitHub Actions.
 
 ### 1. Initializing the Repository (First-Time Setup)
@@ -92,7 +92,7 @@ Once the PR is opened, the statistical engine compares the new results against t
 * **NO-GO:** If a regression is detected, the GitHub Action fails, the merge button is disabled, and the developer is directed to the **Streamlit Dashboard** to inspect the row-level failures.
 ---
 
-## (f) Eval Results (The Baseline)
+## Eval Results (The Baseline)
 Based on a full evaluation run of 90 total cases (30 per task):
 
 * **Overall Pass Rate:** 92.4%
